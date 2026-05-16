@@ -68,7 +68,7 @@ All datasets are linked through standardized country identifiers and are downloa
 | **Chart 5 — Calories vs. Health** (Scatter Plot) | X = calorie supply, Y = selected health metric. Dots colored by continent. Brushing selects countries and shows a summary. |
 | **Chart 6 — Country Clusters** (2D Projection) | K-means clustering of countries by dietary profile, projected via PCA. Hover = dietary profile. Click a cluster = highlights those countries on Chart 5. |
 | **Chart 7 — Obesity Trend Map** (Animated Choropleth) | How obesity prevalence has spread globally over decades. Animated playback with year controls. |
-| **Chart 8 — Regression Dashboard** (Line + Residuals) | Obesity regression model with predicted vs. actual values and a feature importance bar chart. |
+| **Chart 8 — Dietary Profiles** (Parallel Coordinates) | Compares dietary profiles (calories, % meat, % cereals, % fat, % sugar) of high-obesity vs. low-obesity countries side by side. Lines colored by obesity group. |
 
 ### Tab 3: "What's really in our food?"
 

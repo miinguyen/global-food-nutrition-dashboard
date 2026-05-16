@@ -29,14 +29,14 @@ This project explores the global food supply, nutrition, and health through an i
 ### Key Questions Answered
 Our main question has three parts, each mapped to a dedicated dashboard section:
 1. **"What does the world eat?"** — We investigate how dietary patterns and daily calorie supplies vary across 180+ countries and how food source composition (meat, cereals, dairy) has shifted over decades.
-2. **"How healthy is it?"** — We link dietary patterns to health outcomes (obesity, malnutrition, life expectancy) using WHO and OWID data, and apply ML models (country clustering, obesity regression) to uncover hidden relationships.
+2. **"How healthy is it?"** — We link dietary patterns to health outcomes (obesity, malnutrition, life expectancy) using WHO and OWID data, and apply ML models (country clustering, dietary profiling) to uncover hidden relationships.
 3. **"What's really in our food?"** — We drill into 45,000+ food products to assess their nutritional quality (Nutri-Score A–E) and processing levels (NOVA classification), and predict quality scores using ML.
 
 ### Dashboard Highlights
 
 - **Charts and Visualizations:** We've built **12 interactive charts** using **7 distinct types** — choropleth maps, line charts, stacked area charts, horizontal bar charts, scatter plots, donut charts, and 2D cluster projections — spanning all three tabs of the dashboard.
 - **Interactivity:** The dashboard allows users to dynamically explore data through year sliders, continent and food-type dropdowns, and cross-filtering between linked charts. Clicking a country on the map updates trend lines; brushing a scatter plot highlights individual products.
-- **Machine Learning and Analytics:** We integrated several ML components directly into the visual workflow — K-means clustering of countries by dietary profile, linear regression modeling of obesity drivers, and a Nutri-Score classifier that predicts food quality from macronutrient inputs.
+- **Machine Learning and Analytics:** We integrated several ML components directly into the visual workflow — K-means clustering of countries by dietary profile, parallel coordinates for comparing high- vs. low-obesity diets, and a Nutri-Score classifier that predicts food quality from macronutrient inputs.
 - **Reproducibility:** The entire data pipeline is automated via `python data/collect_data.py`, with a complete dependency list in `requirements.txt` and clear setup instructions for one-command replication.
 
 ---
@@ -148,7 +148,7 @@ We've organized our repository to clearly map to the project deliverables:
 
 | Member | Student ID | Responsibilities |
 |--------|-----------|------------------|
-| **Nguyen Thi Tra My** | V202503042 | Country-level data & visualizations (Charts 1–3), country clustering, obesity regression model |
+| **Nguyen Thi Tra My** | V202503042 | Country-level data & visualizations (Charts 1–4), country clustering, dietary profiling |
 | **Tran Thi Hoai Phuong** | V202502962 | Product-level data & visualizations (Charts 4–6), Nutri-Score classification model |
 
 
