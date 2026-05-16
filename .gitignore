@@ -16,7 +16,10 @@ data/*.csv
 data/*.xlsx
 data/*.json
 data/*.parquet
+data/processed/
 !data/.gitkeep
+!data/collect_data.py
+!data/processing.py
 
 # Jupyter
 .ipynb_checkpoints/
