@@ -1,0 +1,22 @@
+# Core framework
+shiny
+shinywidgets
+
+# Visualization
+plotly
+matplotlib
+seaborn
+
+# Data processing
+pandas
+numpy
+openpyxl
+
+# Geospatial
+geopandas
+
+# Machine Learning
+scikit-learn
+
+# Utilities
+requests
