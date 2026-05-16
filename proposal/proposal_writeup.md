@@ -2,7 +2,7 @@
 
 ## 1. Proposal Write-up
 
-### What We're Building
+### What we're storying
 
 We are creating an interactive dashboard using Python Shiny to answer three core questions about our global food system, each mapped to a dedicated tab:
 
