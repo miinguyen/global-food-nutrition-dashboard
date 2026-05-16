@@ -67,14 +67,6 @@ All datasets are downloaded automatically via `python data/collect_data.py`. The
 |------|--------|---------|---------------|
 | `open_food_facts_sample.csv` | [Open Food Facts](https://world.openfoodfacts.org/data) | ~10,000 products | Nutri-Score (A–E), NOVA group (1–4), energy, fat, sugar, salt, protein, fiber |
 
-### Coverage Assessment
-
-| Question | Datasets | Sufficient? |
-|----------|----------|-------------|
-| **Q1: What does the world eat?** | `owid_calorie_supply` + `owid_food_composition` | ✅ Yes — covers per-capita calories and food source breakdown across 200+ countries over 60 years |
-| **Q2: How healthy is it?** | `owid_obesity` + `owid_life_expectancy` + `who_obesity_adults` + `who_underweight_children` | ✅ Yes — links diet to obesity, life expectancy, and child malnutrition across countries. Enables country clustering and regression models |
-| **Q3: What's really in our food?** | `open_food_facts_sample` | ✅ Yes — 10K products with Nutri-Score and NOVA for bar charts, violin plots, radar charts, and ML classification |
-
 ---
 
 ## Tech Stack
