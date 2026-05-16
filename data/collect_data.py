@@ -65,7 +65,9 @@ DATASETS = {
 OFF_CONFIG = {
     "url": "https://world.openfoodfacts.org/cgi/search.pl",
     "filename": "open_food_facts_sample.csv",
-    "description": "Open Food Facts — 10,000 products with Nutri-Score and NOVA",
+    "description": "Open Food Facts — ~10,000 products with Nutri-Score and NOVA",
+    "page_size": 1000,
+    "max_pages": 10,
 }
 
 
@@ -187,11 +189,14 @@ def download_open_food_facts():
     import gzip
 
     filepath = os.path.join(DATA_DIR, OFF_CONFIG["filename"])
+    page_size = OFF_CONFIG.get("page_size", 1000)
+    max_pages = OFF_CONFIG.get("max_pages", 10)
+    target = page_size * max_pages
 
+    # Always re-fetch to get fresh data
     if os.path.exists(filepath):
-        print(f"  ⏭️  open_food_facts: Already exists, skipping.")
-        return True
-
+        print(f"  🔄  open_food_facts: Re-fetching with page_size={page_size}, max_pages={max_pages}...")
+    
     print(f"  ⬇️  open_food_facts: {OFF_CONFIG['description']}")
 
     # --- Strategy 1: Try API ---
@@ -206,30 +211,33 @@ def download_open_food_facts():
         "energy-kcal_100g", "fat_100g", "saturated-fat_100g",
         "sugars_100g", "salt_100g", "proteins_100g",
         "fiber_100g", "carbohydrates_100g",
+        "nutrition_data", "nutrition_data_prepared_per",
+        "nutrition_data_per", "nutriments_estimated",
+        "serving_quantity", "nutrition_data_prepared",
     ])
 
     all_products = []
     api_works = True
 
-    for page in range(1, 101):
-        if len(all_products) >= 10000:
+    for page in range(1, max_pages + 1):
+        if len(all_products) >= target:
             break
         try:
             url = (
                 f"https://world.openfoodfacts.org/api/v2/search"
-                f"?fields={fields}&page_size=100&page={page}"
+                f"?fields={fields}&page_size={page_size}&page={page}"
                 f"&sort_by=popularity_key"
             )
-            resp = requests.get(url, headers=headers, timeout=30)
+            resp = requests.get(url, headers=headers, timeout=60)
             resp.raise_for_status()
             products = resp.json().get("products", [])
             if not products:
                 break
             all_products.extend(products)
-            print(f"\r      API: {len(all_products)}/10000 products...", end="")
-            time.sleep(0.3)
+            print(f"\r      API: {len(all_products)}/{target} products (page {page}/{max_pages})...", end="")
+            time.sleep(0.5)  # polite delay for larger pages
         except Exception as e:
-            print(f"\n      API unavailable: {e}")
+            print(f"\n      API error on page {page}: {e}")
             api_works = False
             break
 
@@ -282,11 +290,11 @@ def download_open_food_facts():
             filtered.append(valid)
             total_rows = sum(len(f) for f in filtered)
             print(f"\r      Found {total_rows} valid products...", end="")
-            if total_rows >= 10000:
+            if total_rows >= target:
                 break
 
         if filtered:
-            df = pd.concat(filtered, ignore_index=True).head(10000)
+            df = pd.concat(filtered, ignore_index=True).head(target)
             df.to_csv(filepath, index=False)
             print(f"\n      ✅ Saved via static export: {len(df)} rows")
             # Clean up temp file
