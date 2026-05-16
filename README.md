@@ -4,9 +4,11 @@
 
 <br>
 
-## *What does the world eat, how healthy is it, and what's really in our food?*
+<a href="#project-overview">
+  <img src="https://img.shields.io/badge/What_does_the_world_eat,_how_healthy_is_it,_and_what's_really_in_our_food%3F-FF6B35?style=for-the-badge&labelColor=FF6B35" alt="Research Question" />
+</a>
 
-<br>
+<br><br>
 
 An interactive data visualization dashboard built with **Python Shiny** for COMP5120 — Data Visualization (Spring).
 
@@ -117,12 +119,12 @@ We've organized our repository to clearly map to the project deliverables:
 
 ---
 
-## Team and Task Allocation
+## 👥 Team
 
-| Member | Responsibilities |
-|--------|-----------------|
-| Member 1 | Handled the country-level data and visualizations (Charts 1–3), country clustering, and the obesity regression model. |
-| Member 2 | Managed the product-level data and visualizations (Charts 4–6), and built the Nutri-Score classification model. |
+| Member | Student ID | Responsibilities |
+|--------|-----------|------------------|
+| **Nguyen Thi Tra My** | V202503042 | Country-level data & visualizations (Charts 1–3), country clustering, obesity regression model |
+| **Tran Thi Hoai Phuong** | V202502962 | Product-level data & visualizations (Charts 4–6), Nutri-Score classification model |
 
 
 ---
