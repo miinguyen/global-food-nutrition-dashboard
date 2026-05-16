@@ -4,9 +4,11 @@
 
 <br>
 
-## *What does the world eat, how healthy is it, and what's really in our food?*
+<a href="#project-overview">
+  <img src="https://readme-typing-svg.demolab.com?font=Poppins&weight=700&size=30&duration=4000&pause=1000&color=FF6B35&center=true&vCenter=true&width=900&height=60&lines=%F0%9F%8D%94+What+does+the+world+eat%2C+how+healthy+is+it%2C;and+what's+really+in+our+food%3F" alt="Research Question" />
+</a>
 
-<br>
+<br><br>
 
 An interactive data visualization dashboard built with **Python Shiny** for COMP5120 — Data Visualization (Spring).
 
@@ -25,9 +27,10 @@ An interactive data visualization dashboard built with **Python Shiny** for COMP
 This project explores the global food supply, nutrition, and health through an interactive two-part dashboard. We designed it to answer real-world questions about our food systems, while tackling the challenge of visualizing complex, high-dimensional data that spans both global trends and individual products.
 
 ### Key Questions Answered
-We divided our analysis into two main perspectives:
-1. **Country-Level Analysis ("What Does the World Eat?"):** We investigate how dietary patterns and daily calorie supplies vary across different regions. We also look at how these patterns correlate with health outcomes, such as obesity and malnutrition.
-2. **Product-Level Analysis ("What's Really in Our Food?"):** We dive into the details of over 45,000 food products to assess their nutritional quality (using the Nutri-Score framework) and their processing levels (using the NOVA classification).
+Our main question has three parts, each mapped to a dedicated dashboard section:
+1. **"What does the world eat?"** — We investigate how dietary patterns and daily calorie supplies vary across 180+ countries and how food source composition (meat, cereals, dairy) has shifted over decades.
+2. **"How healthy is it?"** — We link dietary patterns to health outcomes (obesity, malnutrition, life expectancy) using WHO and OWID data, and apply ML models (country clustering, obesity regression) to uncover hidden relationships.
+3. **"What's really in our food?"** — We drill into 45,000+ food products to assess their nutritional quality (Nutri-Score A–E) and processing levels (NOVA classification), and predict quality scores using ML.
 
 ### Alignment with Project Requirements
 Our project meets and exceeds the core requirements of the Project 2 assignment:
@@ -117,12 +120,12 @@ We've organized our repository to clearly map to the project deliverables:
 
 ---
 
-## Team and Task Allocation
+## 👥 Team
 
-| Member | Responsibilities |
-|--------|-----------------|
-| Member 1 | Handled the country-level data and visualizations (Charts 1–3), country clustering, and the obesity regression model. |
-| Member 2 | Managed the product-level data and visualizations (Charts 4–6), and built the Nutri-Score classification model. |
+| Member | Student ID | Responsibilities |
+|--------|-----------|------------------|
+| **Nguyen Thi Tra My** | V202503042 | Country-level data & visualizations (Charts 1–3), country clustering, obesity regression model |
+| **Tran Thi Hoai Phuong** | V202502962 | Product-level data & visualizations (Charts 4–6), Nutri-Score classification model |
 
 
 ---
