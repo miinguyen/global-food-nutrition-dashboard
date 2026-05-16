@@ -2,7 +2,7 @@
 
 ## Project Description
 
-This project builds an interactive Python Shiny dashboard to explore the question: *"What does the world eat, how healthy is it, and what's really in our food?"* The application combines country-level food supply data with product-level nutritional analysis to provide a comprehensive view of global food and nutrition patterns. Users can explore calorie distribution across nations, track dietary trends over decades, and drill down into the nutritional quality of individual food products.
+This project builds an interactive Python Shiny dashboard to explore three interconnected questions: *(1) What does the world eat?* — examining dietary patterns and calorie supply across 180+ countries; *(2) How healthy is it?* — linking food systems to health outcomes such as obesity and malnutrition; and *(3) What's really in our food?* — drilling into 45,000+ food products to assess nutritional quality and processing levels. The application combines country-level food supply data (FAOSTAT, Our World in Data, WHO) with product-level nutritional analysis (Kaggle) to provide a comprehensive, multi-scale view of global food and nutrition.
 
 ## Motivation
 

@@ -27,9 +27,10 @@ An interactive data visualization dashboard built with **Python Shiny** for COMP
 This project explores the global food supply, nutrition, and health through an interactive two-part dashboard. We designed it to answer real-world questions about our food systems, while tackling the challenge of visualizing complex, high-dimensional data that spans both global trends and individual products.
 
 ### Key Questions Answered
-We divided our analysis into two main perspectives:
-1. **Country-Level Analysis ("What Does the World Eat?"):** We investigate how dietary patterns and daily calorie supplies vary across different regions. We also look at how these patterns correlate with health outcomes, such as obesity and malnutrition.
-2. **Product-Level Analysis ("What's Really in Our Food?"):** We dive into the details of over 45,000 food products to assess their nutritional quality (using the Nutri-Score framework) and their processing levels (using the NOVA classification).
+Our main question has three parts, each mapped to a dedicated dashboard section:
+1. **🌍 "What does the world eat?"** — We investigate how dietary patterns and daily calorie supplies vary across 180+ countries and how food source composition (meat, cereals, dairy) has shifted over decades.
+2. **📊 "How healthy is it?"** — We link dietary patterns to health outcomes (obesity, malnutrition, life expectancy) using WHO and OWID data, and apply ML models (country clustering, obesity regression) to uncover hidden relationships.
+3. **🔬 "What's really in our food?"** — We drill into 45,000+ food products to assess their nutritional quality (Nutri-Score A–E) and processing levels (NOVA classification), and predict quality scores using ML.
 
 ### Alignment with Project Requirements
 Our project meets and exceeds the core requirements of the Project 2 assignment:
