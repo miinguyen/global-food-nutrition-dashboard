@@ -28,9 +28,9 @@ This project explores the global food supply, nutrition, and health through an i
 
 ### Key Questions Answered
 Our main question has three parts, each mapped to a dedicated dashboard section:
-1. **🌍 "What does the world eat?"** — We investigate how dietary patterns and daily calorie supplies vary across 180+ countries and how food source composition (meat, cereals, dairy) has shifted over decades.
-2. **📊 "How healthy is it?"** — We link dietary patterns to health outcomes (obesity, malnutrition, life expectancy) using WHO and OWID data, and apply ML models (country clustering, obesity regression) to uncover hidden relationships.
-3. **🔬 "What's really in our food?"** — We drill into 45,000+ food products to assess their nutritional quality (Nutri-Score A–E) and processing levels (NOVA classification), and predict quality scores using ML.
+1. **"What does the world eat?"** — We investigate how dietary patterns and daily calorie supplies vary across 180+ countries and how food source composition (meat, cereals, dairy) has shifted over decades.
+2. **"How healthy is it?"** — We link dietary patterns to health outcomes (obesity, malnutrition, life expectancy) using WHO and OWID data, and apply ML models (country clustering, obesity regression) to uncover hidden relationships.
+3. **"What's really in our food?"** — We drill into 45,000+ food products to assess their nutritional quality (Nutri-Score A–E) and processing levels (NOVA classification), and predict quality scores using ML.
 
 ### Alignment with Project Requirements
 Our project meets and exceeds the core requirements of the Project 2 assignment:
