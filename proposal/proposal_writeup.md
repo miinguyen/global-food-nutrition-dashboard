@@ -1,32 +1,89 @@
 # Project Proposal: Global Food & Nutrition Dashboard
 
-## Project Description
+## 1. Proposal Write-up
 
-This project builds an interactive Python Shiny dashboard to explore the question: *"What does the world eat, how healthy is it, and what's really in our food?"* The application combines country-level food supply data with product-level nutritional analysis to provide a comprehensive view of global food and nutrition patterns. Users can explore calorie distribution across nations, track dietary trends over decades, and drill down into the nutritional quality of individual food products.
+### What We're Building
 
-## Motivation
+We are creating an interactive dashboard using Python Shiny to answer three core questions about our global food system, each mapped to a dedicated tab:
 
-Food is universal, yet deeply unequal. Over 800 million people face hunger while 1 billion are obese — often in the same countries. Understanding what the world eats, and the nutritional quality of available food, is critical for public health policy, sustainable development, and individual awareness. This dashboard makes complex, multi-source nutrition data accessible through interactive visual storytelling, bridging the gap between raw statistics and actionable insight.
+1. **"What does the world eat?"** — We examine how calorie supplies and food sources vary across 180+ countries over decades.
+2. **"How healthy is it?"** — We link dietary patterns to health outcomes (obesity, malnutrition) and use ML models to uncover hidden relationships.
+3. **"What's really in our food?"** — We zoom into 45,000+ food products to assess nutritional quality using Nutri-Score and NOVA classifications.
 
-## Dataset Description
+### Why It Matters
 
-We combine four complementary data sources:
+More than 800 million people go hungry while over a billion struggle with obesity — often in the same countries. The data to understand these issues exists, but it is scattered across different organizations and formats. Our dashboard pulls it together into one interactive experience so anyone can explore and learn from it.
 
-- **FAOSTAT Food Balance Sheets** (FAO): Daily per-capita calorie, protein, and fat supply for 180+ countries (2010–2023), broken down by food source (meat, cereals, dairy, etc.).
-- **Our World in Data — Food Supply**: Long-term trends (1961–2023) linking calorie supply to health outcomes (obesity, life expectancy) across 200+ countries.
-- **WHO Global Health Observatory**: Country-level obesity prevalence, malnutrition, and stunting indicators.
-- **Kaggle Global Food & Nutrition Dataset**: Product-level data for 45,000+ food items including Nutri-Score (A–E), NOVA processing classification, macronutrients, and Eco-Score.
+### Our Datasets
 
-Data is available in CSV/XLSX format and requires merging across sources using country codes (ISO-3) and standardized food category mappings.
+We combine four sources, linked through ISO-3 country codes:
 
-## Visualization Challenge
+1. **FAOSTAT Food Balance Sheets** — Calorie, protein, and fat supply for 180+ countries (2010–2023).
+2. **Our World in Data** — Dietary trends (1961–2023) tied to obesity and life expectancy.
+3. **WHO Global Health Observatory** — Country-level obesity and malnutrition indicators.
+4. **Kaggle Global Food & Nutrition** — Product-level profiles for 45,000+ items (Nutri-Score, NOVA, macronutrients).
 
-This data presents several non-trivial visualization challenges:
+Merging requires aligning country identifiers, time periods, and food category names across four different formats.
 
-1. **Multi-scale structure**: Country-level aggregates (180+ nations × 60+ years) must coexist with product-level detail (45,000+ items × 20+ nutritional features) in a single coherent interface.
-2. **Spatio-temporal dimensions**: Mapping calorie supply geographically while simultaneously showing temporal trends requires linked, cross-filtered views.
-3. **High dimensionality**: Each food product has 20+ nutritional attributes (energy, sugar, fat, sodium, fiber, Nutri-Score, NOVA class) that must be compared across categories without overwhelming the viewer.
-4. **Heterogeneous data types**: Combining continuous variables (calories, macronutrients), ordinal scales (Nutri-Score A–E, NOVA 1–4), and categorical groupings (food types, continents) demands diverse chart types and careful encoding choices.
-5. **ML integration**: Embedding predictive models (Nutri-Score classification, country clustering, obesity regression) within the visual analytics workflow adds interaction complexity.
+### Why This Data is Hard to Visualize
 
-*Word count: ~340*
+1. **Scale mismatch.** Country-level aggregates (180 nations × 60 years) must coexist with product-level detail (45,000+ items × 20+ attributes).
+2. **Space + time.** Geographic calorie patterns and their temporal evolution need linked, cross-filtered views.
+3. **High dimensionality.** 20+ nutritional attributes per product require careful encoding to avoid clutter.
+4. **Mixed types.** Numbers (calories), ranked scales (Nutri-Score A–E), and categories (food groups) each need different visual treatments, all working together.
+
+*(Word count: ~290)*
+
+---
+
+## 2. Wireframe Annotations & Layout Plan
+
+### Interface Structure
+
+- **Navigation:** Three tabs, one per core question. A global header shows the project title and active tab.
+- **Layout per tab:** Left sidebar (~25% width) for filters, main panel (~75%) for charts in a responsive grid.
+- **Responsive behavior:** Charts sit side-by-side on desktop, stack vertically on smaller screens. Sidebar collapses on mobile.
+
+---
+
+### Tab 1: "What does the world eat?"
+
+| Component | Details |
+|-----------|---------|
+| **Filters** | Year slider (1961–2023), Continent dropdown, Food Type dropdown |
+| **Chart 1 — Choropleth Map** | Shows per-capita calorie supply by country. Hover = tooltip with values. Click a country = cross-filters Chart 2. |
+| **Chart 2 — Line Chart** | Shows calorie trend over time for the selected country (bold) vs. global average (dashed). Updates when a country is clicked on the map. |
+
+### Tab 2: "How healthy is it?"
+
+| Component | Details |
+|-----------|---------|
+| **Filters** | Year slider (shared with Tab 1), Health Metric dropdown (Obesity / Malnutrition / Life Expectancy) |
+| **Chart 3 — Scatter Plot** | X = calorie supply, Y = selected health metric. Dots colored by continent. Brushing selects countries and shows a summary. |
+| **Chart 4 — Cluster Visualization** | K-means clustering of countries by diet, displayed as a 2D projection. Hover = dietary profile. Click a cluster = highlights those countries on Chart 3. |
+
+### Tab 3: "What's really in our food?"
+
+| Component | Details |
+|-----------|---------|
+| **Filters** | Food Category multi-select, NOVA level checkboxes, optional Nutri-Score filter |
+| **Chart 5 — Stacked Bar Chart** | Nutri-Score distribution (A–E) per food category. Click a bar segment = filters Chart 6. |
+| **Chart 6 — Scatter Plot** | Sugar (X) vs. Fat (Y) per product, colored by Nutri-Score, sized by calories. Brushing selects products for detail view. |
+
+### Cross-Filtering
+
+- Clicking a country on Tab 1 pre-selects it when navigating to Tab 2. The year slider persists across Tabs 1 and 2.
+- Tab 3 operates independently (different dataset).
+- All charts use Plotly (built-in zoom, pan, and export).
+
+*(The wireframe sketch image is in `proposal/wireframe/dashboard_wireframe.png`.)*
+
+---
+
+## 3. Presentation Slides Outline (5 Minutes)
+
+- **Slide 1:** Title, team (Nguyen Thi Tra My — V202503042, Tran Thi Hoai Phuong — V202502962), [GitHub link](https://github.com/miinguyen/global-food-nutrition-dashboard).
+- **Slide 2:** Three-part question, dashboard structure, and project timeline.
+- **Slide 3:** Four datasets, integration challenges (ISO-3 codes, mixed formats).
+- **Slide 4:** Wireframe walkthrough, interactive features (cross-filtering, brushing), ML components (Nutri-Score prediction, clustering, regression).
+- **Slide 5:** Task allocation and next steps (data pipeline → MVP → final submission).
