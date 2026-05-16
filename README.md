@@ -43,14 +43,29 @@ Our project meets and exceeds the core requirements of the Project 2 assignment:
 
 ## Datasets Used
 
-To build this dashboard, we synthesized data from four major sources:
+All datasets are downloaded automatically via `python data/collect_data.py`. The script is idempotent — re-running it skips already-downloaded files.
 
-| Source | Level | Coverage | Description |
-|--------|-------|----------|-------------|
-| [FAOSTAT Food Balance Sheets](https://www.fao.org/faostat/en/#data/FBS) | Country | 180+ countries, 2010–2023 | Global food supply and macronutrient composition |
-| [Our World in Data — Food Supply](https://ourworldindata.org/food-supply) | Country | 200+ countries, 1961–2023 | Historical trends in diet and food availability |
-| [WHO GHO — Nutrition](https://apps.who.int/gho/data/node.home) | Country | Global health indicators | Health outcomes (obesity, malnutrition) |
-| [Kaggle — Global Food & Nutrition](https://www.kaggle.com/) | Product | 45,000+ food items | Granular product-level nutritional profiles |
+### Question 1: "What does the world eat?"
+
+| File | Source | Records | Key Variables |
+|------|--------|---------|---------------|
+| `owid_calorie_supply.csv` | [Our World in Data](https://ourworldindata.org/grapher/daily-per-capita-caloric-supply) | 200+ countries, 1961–2023 | Daily kcal per capita by country and year |
+| `owid_food_composition.csv` | [Our World in Data](https://ourworldindata.org/grapher/dietary-composition-by-country) | 200+ countries, 1961–2023 | Calorie breakdown by food group (meat, cereals, dairy, fruits, oils) |
+
+### Question 2: "How healthy is it?"
+
+| File | Source | Records | Key Variables |
+|------|--------|---------|---------------|
+| `owid_obesity.csv` | [Our World in Data](https://ourworldindata.org/grapher/share-of-adults-defined-as-obese) | 200+ countries, 1975–2016 | Share of adults with BMI ≥ 30 (%) |
+| `owid_life_expectancy.csv` | [Our World in Data](https://ourworldindata.org/grapher/life-expectancy) | 200+ countries, 1543–2023 | Life expectancy at birth (years) |
+| `who_obesity_adults.csv` | [WHO GHO API](https://ghoapi.azureedge.net/api/) | 190+ countries, 1975–2022 | Obesity prevalence (both sexes), with confidence intervals |
+| `who_underweight_children.csv` | [WHO GHO API](https://ghoapi.azureedge.net/api/) | 130+ countries, 1983–2022 | Underweight prevalence in children under 5 |
+
+### Question 3: "What's really in our food?"
+
+| File | Source | Records | Key Variables |
+|------|--------|---------|---------------|
+| `open_food_facts_sample.csv` | [Open Food Facts](https://world.openfoodfacts.org/data) | ~10,000 products | Nutri-Score (A–E), NOVA group (1–4), energy, fat, sugar, salt, protein, fiber |
 
 ---
 
@@ -113,6 +128,15 @@ We've organized our repository to clearly map to the project deliverables:
 │   └── app.py                # Dashboard entry point
 │
 ├── data/                     # Data files and collection scripts
+│   ├── collect_data.py       # Automated data collection script (run this first)
+│   ├── owid_calorie_supply.csv
+│   ├── owid_food_composition.csv
+│   ├── owid_obesity.csv
+│   ├── owid_life_expectancy.csv
+│   ├── who_obesity_adults.csv
+│   ├── who_underweight_children.csv
+│   └── open_food_facts_sample.csv
+│
 ├── notebooks/                # EDA and ML model training notebooks
 ├── report/                   # Milestone 2: Final LaTeX report (Due June 7)
 └── slides/                   # Presentation slides for the proposal and final demo

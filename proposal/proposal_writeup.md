@@ -14,20 +14,16 @@ We are creating an interactive dashboard using Python Shiny to answer three core
 
 More than 800 million people go hungry while over a billion struggle with obesity — often in the same countries. The data to understand these issues exists, but it is scattered across different organizations and formats, making it nearly impossible for anyone to see the full picture in one place. Our dashboard pulls these fragmented sources together into a single interactive experience so that students, researchers, or anyone curious about food systems can explore and learn from it.
 
-### Our Datasets and Why They Fit
+### Our Datasets
 
-We selected datasets that directly serve each of our three questions:
+We combine four sources, linked through ISO-3 country codes:
 
-| Question | Dataset | Coverage | Why It Fits |
-|----------|---------|----------|-------------|
-| **Q1: "What does the world eat?"** | Our World in Data — Calorie Supply | 200+ countries, 1961–2023 | Provides the long-term, country-level dietary trends needed to show how food consumption has shifted over six decades |
-| | Our World in Data — Food Composition | 200+ countries, 1961–2023 | Breaks down calories by food group (meat, cereals, dairy) to reveal what people actually eat |
-| **Q2: "How healthy is it?"** | Our World in Data — Obesity | 200+ countries, 1975–2016 | Links dietary patterns directly to obesity prevalence for correlation analysis |
-| | Our World in Data — Life Expectancy | 200+ countries, 1543–2023 | Connects diet to broader health outcomes beyond obesity |
-| | WHO GHO — Adult Obesity & Child Underweight | 190+ countries, 1975–2022 | Adds clinical health indicators with confidence intervals for ML modeling |
-| **Q3: "What's really in our food?"** | Open Food Facts | ~10,000 products | The only dataset granular enough to assess individual products by Nutri-Score, NOVA level, and macronutrients |
+1. **FAOSTAT Food Balance Sheets** — Calorie, protein, and fat supply for 180+ countries (2010–2023).
+2. **Our World in Data** — Dietary trends (1961–2023) tied to obesity and life expectancy.
+3. **WHO Global Health Observatory** — Country-level obesity and malnutrition indicators.
+4. **Kaggle Global Food & Nutrition** — Product-level profiles for 45,000+ items (Nutri-Score, NOVA, macronutrients).
 
-All datasets are linked through standardized country identifiers and are downloaded automatically via a collection script in our repository.
+Merging requires aligning country identifiers, time periods, and food category names across four different formats.
 
 ### Why This Data is Hard to Visualize
 
