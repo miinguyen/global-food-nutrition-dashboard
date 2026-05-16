@@ -20,12 +20,12 @@ We selected datasets that directly serve each of our three questions:
 
 | Question | Dataset | Coverage | Why It Fits |
 |----------|---------|----------|-------------|
-| **Q1: "What does the world eat?"** | Our World in Data — Calorie Supply | 200+ countries, 1961–2023 | Provides the long-term, country-level dietary trends needed to show how food consumption has shifted over six decades |
-| | Our World in Data — Food Composition | 200+ countries, 1961–2023 | Breaks down calories by food group (meat, cereals, dairy) to reveal what people actually eat |
-| **Q2: "How healthy is it?"** | Our World in Data — Obesity | 200+ countries, 1975–2016 | Links dietary patterns directly to obesity prevalence for correlation analysis |
-| | Our World in Data — Life Expectancy | 200+ countries, 1543–2023 | Connects diet to broader health outcomes beyond obesity |
-| | WHO GHO — Adult Obesity & Child Underweight | 190+ countries, 1975–2022 | Adds clinical health indicators with confidence intervals for ML modeling |
-| **Q3: "What's really in our food?"** | Open Food Facts | ~10,000 products | The only dataset granular enough to assess individual products by Nutri-Score, NOVA level, and macronutrients |
+| **Q1: "What does the world eat?"** | [Our World in Data — Calorie Supply](https://ourworldindata.org/grapher/daily-per-capita-caloric-supply) | 200+ countries, 1961–2023 | Provides the long-term, country-level dietary trends needed to show how food consumption has shifted over six decades |
+| | [Our World in Data — Food Composition](https://ourworldindata.org/grapher/dietary-composition-by-country) | 200+ countries, 1961–2023 | Breaks down calories by food group (meat, cereals, dairy) to reveal what people actually eat |
+| **Q2: "How healthy is it?"** | [Our World in Data — Obesity](https://ourworldindata.org/grapher/share-of-adults-defined-as-obese) | 200+ countries, 1975–2016 | Links dietary patterns directly to obesity prevalence for correlation analysis |
+| | [Our World in Data — Life Expectancy](https://ourworldindata.org/grapher/life-expectancy) | 200+ countries, 1543–2023 | Connects diet to broader health outcomes beyond obesity |
+| | [WHO GHO — Adult Obesity & Child Underweight](https://ghoapi.azureedge.net/api/) | 190+ countries, 1975–2022 | Adds clinical health indicators with confidence intervals for ML modeling |
+| **Q3: "What's really in our food?"** | [Open Food Facts](https://world.openfoodfacts.org/data) | ~10,000 products | The only dataset granular enough to assess individual products by Nutri-Score, NOVA level, and macronutrients |
 
 All datasets are linked through standardized country identifiers and are downloaded automatically via a collection script in our repository.
 
