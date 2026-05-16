@@ -1,4 +1,0 @@
-LEADER = "#1f77b4"
-GAINER = "#2ca02c"
-LAGGARD = "#d62728"
-AVG = "#888"
