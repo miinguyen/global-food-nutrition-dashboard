@@ -16,14 +16,13 @@ More than 800 million people go hungry while over a billion struggle with obesit
 
 ### Our Datasets
 
-We combine four sources, linked through ISO-3 country codes:
+We combine three major sources to build a complete picture:
 
-1. **FAOSTAT Food Balance Sheets** — Calorie, protein, and fat supply for 180+ countries (2010–2023).
-2. **Our World in Data** — Dietary trends (1961–2023) tied to obesity and life expectancy.
-3. **WHO Global Health Observatory** — Country-level obesity and malnutrition indicators.
-4. **Kaggle Global Food & Nutrition** — Product-level profiles for 45,000+ items (Nutri-Score, NOVA, macronutrients).
+1. **Our World in Data (OWID)** — Daily calorie supply, dietary composition by food group (meat, cereals, dairy), obesity rates, and life expectancy across 200+ countries (1961–2023).
+2. **WHO Global Health Observatory** — Country-level health outcomes, including adult obesity and child malnutrition prevalence.
+3. **Open Food Facts** — A sample of 10,000+ detailed product profiles including Nutri-Score (A–E), NOVA processing classifications, and macronutrients.
 
-Merging requires aligning country identifiers, time periods, and food category names across four different formats.
+Merging requires aligning country identifiers (ISO-3 codes), time periods, and harmonizing the health metrics across different sources.
 
 ### Why This Data is Hard to Visualize
 
