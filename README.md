@@ -112,8 +112,7 @@ We've organized our repository to clearly map to the project deliverables:
 ├── data/                     # Data files and collection scripts
 ├── notebooks/                # EDA and ML model training notebooks
 ├── report/                   # Milestone 2: Final LaTeX report (Due June 7)
-├── slides/                   # Presentation slides for the proposal and final demo
-└── week10/                   # Course exercise examples
+└── slides/                   # Presentation slides for the proposal and final demo
 ```
 
 ---
