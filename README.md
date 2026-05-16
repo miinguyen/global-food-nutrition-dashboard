@@ -134,8 +134,8 @@ We've organized our repository to clearly map to the project deliverables:
 
 | Milestone | Deliverables | Due Date | Status |
 |-----------|--------------|----------|--------|
-| **Proposal** | Write-up (<500 words), Wireframes, Slides | May 18, 2026 | In Progress |
-| **Development**| Data Collection, Cleaning, and ML Modeling | May 25, 2026 | Not Started |
+| **Proposal** | Write-up (<500 words), Wireframes, Slides, Data Collection | May 18, 2026 | In Progress |
+| **Development**| Cleaning, and ML Modeling | May 25, 2026 | Not Started |
 | **Dashboard MVP**| Implementation of the Shiny App with initial charts | June 1, 2026 | Not Started |
 | **Final Submission**| Source code, LaTeX Report, Final Slides, and Demo | June 7, 2026 | Not Started |
 
