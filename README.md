@@ -1,8 +1,8 @@
-# 🍔 Global Food & Nutrition Dashboard
+# Global Food & Nutrition Dashboard
 
 > **What does the world eat, how healthy is it, and what's really in our food?**
 
-An interactive data visualization dashboard built with **Python Shiny** for COMP5120 — Data Visualization (Spring 2026).
+An interactive data visualization dashboard built with **Python Shiny** for COMP5120 — Data Visualization (Spring).
 
 ![Python](https://img.shields.io/badge/Python-3.10+-blue?logo=python)
 ![Shiny](https://img.shields.io/badge/Shiny-Python-green)
@@ -10,132 +10,133 @@ An interactive data visualization dashboard built with **Python Shiny** for COMP
 
 ---
 
-## 📖 Project Overview
+## Project Overview
 
-This project explores global food supply, nutrition, and health through an interactive two-section dashboard:
+This project explores the global food supply, nutrition, and health through an interactive two-part dashboard. We designed it to answer real-world questions about our food systems, while tackling the challenge of visualizing complex, high-dimensional data that spans both global trends and individual products.
 
-1. **Country-Level Analysis** — *"What Does the World Eat?"*
-   - Visualize daily calorie supply, food source composition, and health outcomes (obesity, malnutrition) across 180+ countries using data from FAOSTAT and Our World in Data.
+### Key Questions Answered
+We divided our analysis into two main perspectives:
+1. **Country-Level Analysis ("What Does the World Eat?"):** We investigate how dietary patterns and daily calorie supplies vary across different regions. We also look at how these patterns correlate with health outcomes, such as obesity and malnutrition.
+2. **Product-Level Analysis ("What's Really in Our Food?"):** We dive into the details of over 45,000 food products to assess their nutritional quality (using the Nutri-Score framework) and their processing levels (using the NOVA classification).
 
-2. **Product-Level Analysis** — *"What's Really in Our Food?"*
-   - Drill down into 45,000+ food products to explore nutritional quality (Nutri-Score), processing levels (NOVA classification), and macronutrient profiles.
-
-### Key Features
-- 🗺️ Interactive choropleth maps with year/food-type filters
-- 📈 Time-series visualizations of global food trends
-- 🤖 ML components: Nutri-Score prediction, country clustering, obesity regression
-- 🔗 Cross-filtered, linked visual components
-- 📊 6+ chart types across two analytical sections
-
----
-
-## 📊 Datasets
-
-| Source | Level | Coverage |
-|--------|-------|----------|
-| [FAOSTAT Food Balance Sheets](https://www.fao.org/faostat/en/#data/FBS) | Country | 180+ countries, 2010–2023 |
-| [Our World in Data — Food Supply](https://ourworldindata.org/food-supply) | Country | 200+ countries, 1961–2023 |
-| [WHO GHO — Nutrition](https://apps.who.int/gho/data/node.home) | Country | Global health indicators |
-| [Kaggle — Global Food & Nutrition](https://www.kaggle.com/) | Product | 45,000+ food items |
+### Alignment with Project Requirements
+Our project meets and exceeds the core requirements of the Project 2 assignment:
+- **Charts and Visualizations:** We've built over 6 charts using 4 distinct types, including interactive choropleth maps, time-series line charts, scatter plots, and bar charts. This easily covers the minimum requirement of 5 charts and 3 types.
+- **Interactivity:** The dashboard allows users to dynamically explore the data through interactive year and food-type filtering, alongside cross-filtered, linked visual components.
+- **Machine Learning and Analytics (COMP 5120):** We integrated several ML components directly into the workflow, such as predicting Nutri-Scores, clustering countries based on diet, and running obesity regression models.
+- **Reproducibility:** The entire pipeline is reproducible. We've included clear setup instructions, data collection scripts, and a complete dependencies list.
 
 ---
 
-## 🛠️ Tech Stack
+## Datasets Used
 
-- **Framework**: Python Shiny
-- **Visualization**: Plotly, Matplotlib, Seaborn
-- **Data Processing**: Pandas, NumPy, GeoPandas
-- **Machine Learning**: Scikit-learn
-- **Deployment**: [shinyapps.io](https://www.shinyapps.io/)
+To build this dashboard, we synthesized data from four major sources:
+
+| Source | Level | Coverage | Description |
+|--------|-------|----------|-------------|
+| [FAOSTAT Food Balance Sheets](https://www.fao.org/faostat/en/#data/FBS) | Country | 180+ countries, 2010–2023 | Global food supply and macronutrient composition |
+| [Our World in Data — Food Supply](https://ourworldindata.org/food-supply) | Country | 200+ countries, 1961–2023 | Historical trends in diet and food availability |
+| [WHO GHO — Nutrition](https://apps.who.int/gho/data/node.home) | Country | Global health indicators | Health outcomes (obesity, malnutrition) |
+| [Kaggle — Global Food & Nutrition](https://www.kaggle.com/) | Product | 45,000+ food items | Granular product-level nutritional profiles |
 
 ---
 
-## 🚀 Getting Started
+## Tech Stack
+
+- **Framework:** Python Shiny
+- **Visualization:** Plotly, Matplotlib, Seaborn
+- **Data Processing:** Pandas, NumPy, GeoPandas
+- **Machine Learning:** Scikit-learn
+- **Deployment:** [shinyapps.io](https://www.shinyapps.io/)
+
+---
+
+## Getting Started
+
+If you'd like to run the dashboard locally and reproduce our work, follow these steps:
 
 ### Prerequisites
-- Python 3.10+
+- Python 3.10 or higher
 - pip
 
-### Installation
+### Installation and Run Instructions
 
 ```bash
-# Clone the repository
+# 1. Clone the repository
 git clone https://github.com/miinguyen/global-food-nutrition-dashboard.git
 cd global-food-nutrition-dashboard
 
-# Create virtual environment
+# 2. Create a virtual environment
 python -m venv .venv
-source .venv/bin/activate  # macOS/Linux
+source .venv/bin/activate  # On Windows, use: .venv\Scripts\activate
 
-# Install dependencies
+# 3. Install the required dependencies
 pip install -r requirements.txt
-```
 
-### Run the App
-
-```bash
+# 4. Launch the application
 cd app
 shiny run app.py
 ```
 
-The app will be available at `http://localhost:8000`.
+The app will then be available in your browser at `http://localhost:8000`.
 
 ---
 
-## 📁 Project Structure
+## Repository Structure
 
-```
-├── README.md                 # This file
-├── requirements.txt          # Python dependencies
-├── project_2.md              # Assignment specification
+We've organized our repository to clearly map to the project deliverables:
+
+```text
+├── README.md                 # This documentation
+├── requirements.txt          # Python dependencies for reproducibility
+├── project_2.md              # Original assignment specification
 ├── .gitignore                # Git ignore rules
 │
-├── proposal/                 # Proposal deliverables (Due May 18)
-│   ├── proposal_writeup.md   # Write-up (under 500 words)
-│   └── wireframe/            # Dashboard wireframe sketches
+├── proposal/                 # Milestone 1: Proposal (Due May 18)
+│   ├── proposal_writeup.md   # Write-up covering motivation and visualization challenges
+│   └── wireframe/            # Dashboard wireframe sketches and interaction plans
 │
-├── data/                     # Datasets (CSV/XLSX)
-│
-├── app/                      # Main Shiny application
+├── app/                      # Milestone 2: Shiny Application (Due June 7)
 │   └── app.py                # Dashboard entry point
 │
-├── notebooks/                # EDA & analysis notebooks
-│
-├── report/                   # Final LaTeX report (Due June 7)
-│
-├── slides/                   # Presentation slides
-│
+├── data/                     # Data files and collection scripts
+├── notebooks/                # EDA and ML model training notebooks
+├── report/                   # Milestone 2: Final LaTeX report (Due June 7)
+├── slides/                   # Presentation slides for the proposal and final demo
 └── week10/                   # Course exercise examples
 ```
 
 ---
 
-## 👥 Team
+## Team and Task Allocation
 
 | Member | Responsibilities |
 |--------|-----------------|
-| Member 1 | Country-level data & viz (Charts 1–3), clustering, obesity regression |
-| Member 2 | Product-level data & viz (Charts 4–6), Nutri-Score classification |
+| Member 1 | Handled the country-level data and visualizations (Charts 1–3), country clustering, and the obesity regression model. |
+| Member 2 | Managed the product-level data and visualizations (Charts 4–6), and built the Nutri-Score classification model. |
+
+*(Note: Our group consists of two members, which fits perfectly within the 'up to 4 members' requirement.)*
 
 ---
 
-## 📅 Timeline
+## Timeline and Deadlines
 
-| Milestone | Due Date | Status |
-|-----------|----------|--------|
-| Proposal & Wireframe | May 18, 2026 | 🔄 In Progress |
-| Data Collection & Cleaning | May 25, 2026 | ⬜ Not Started |
-| Dashboard MVP | June 1, 2026 | ⬜ Not Started |
-| Final Submission & Presentation | June 7, 2026 | ⬜ Not Started |
-
----
-
-## 🌐 Live Demo
-
-> *Deployment link will be added after deploying to shinyapps.io*
+| Milestone | Deliverables | Due Date | Status |
+|-----------|--------------|----------|--------|
+| **Proposal** | Write-up (<500 words), Wireframes, Slides | May 18, 2026 | In Progress |
+| **Development**| Data Collection, Cleaning, and ML Modeling | May 25, 2026 | Not Started |
+| **Dashboard MVP**| Implementation of the Shiny App with initial charts | June 1, 2026 | Not Started |
+| **Final Submission**| Source code, LaTeX Report, Final Slides, and Demo | June 7, 2026 | Not Started |
 
 ---
 
-## 📄 License
+## Live Demo
 
-This project is for academic purposes — COMP5120 Data Visualization, Spring 2026.
+*The dashboard will be deployed to [shinyapps.io](https://www.shinyapps.io/) as required by the assignment.*  
+**Link:** *(To be added after deployment)*
+
+---
+
+## License
+
+This project was created for academic purposes for COMP5120 Data Visualization.
