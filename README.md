@@ -1,12 +1,22 @@
+<div align="center">
+
 # Global Food & Nutrition Dashboard
 
-> **What does the world eat, how healthy is it, and what's really in our food?**
+<br>
+
+## *What does the world eat, how healthy is it, and what's really in our food?*
+
+<br>
 
 An interactive data visualization dashboard built with **Python Shiny** for COMP5120 — Data Visualization (Spring).
 
-![Python](https://img.shields.io/badge/Python-3.10+-blue?logo=python)
-![Shiny](https://img.shields.io/badge/Shiny-Python-green)
-![License](https://img.shields.io/badge/License-MIT-yellow)
+<p>
+  <img src="https://img.shields.io/badge/Python-3.10+-blue?logo=python" alt="Python" />
+  <img src="https://img.shields.io/badge/Shiny-Python-green" alt="Shiny" />
+  <img src="https://img.shields.io/badge/License-MIT-yellow" alt="License" />
+</p>
+
+</div>
 
 ---
 
@@ -115,7 +125,6 @@ We've organized our repository to clearly map to the project deliverables:
 | Member 1 | Handled the country-level data and visualizations (Charts 1–3), country clustering, and the obesity regression model. |
 | Member 2 | Managed the product-level data and visualizations (Charts 4–6), and built the Nutri-Score classification model. |
 
-*(Note: Our group consists of two members, which fits perfectly within the 'up to 4 members' requirement.)*
 
 ---
 
