@@ -46,16 +46,18 @@ DATASETS = {
     },
     # --- WHO GHO: Health Outcomes ---
     "who_obesity_adults": {
-        "url": "https://ghoapi.azureedge.net/api/NCD_BMI_30A?$filter=Dim1 eq 'BTSX'",
+        "url": "https://ghoapi.azureedge.net/api/NCD_BMI_30A",
         "filename": "who_obesity_adults.csv",
-        "description": "WHO: Prevalence of obesity among adults (BMI ≥ 30), both sexes",
+        "description": "WHO: Prevalence of obesity among adults (BMI ≥ 30)",
         "type": "who_api",
+        "filter_sex": "SEX_BTSX",
     },
     "who_underweight_children": {
-        "url": "https://ghoapi.azureedge.net/api/NUTRITION_WA_2?$filter=Dim1 eq 'BTSX'",
+        "url": "https://ghoapi.azureedge.net/api/NUTRITION_WA_2",
         "filename": "who_underweight_children.csv",
         "description": "WHO: Prevalence of underweight among children under 5",
         "type": "who_api",
+        "filter_sex": "SEX_BTSX",
     },
 }
 
@@ -76,9 +78,11 @@ def download_csv(name: str, url: str, filename: str, description: str, **kwargs)
     """Download a CSV file from a direct URL."""
     filepath = os.path.join(DATA_DIR, filename)
 
-    if os.path.exists(filepath):
+    if os.path.exists(filepath) and os.path.getsize(filepath) > 100:
         print(f"  ⏭️  {name}: Already exists, skipping. Delete to re-download.")
         return True
+    elif os.path.exists(filepath):
+        os.remove(filepath)  # Remove empty/corrupt file
 
     print(f"  ⬇️  {name}: {description}")
     print(f"      URL: {url[:80]}...")
@@ -102,36 +106,65 @@ def download_csv(name: str, url: str, filename: str, description: str, **kwargs)
 
 
 def download_who_api(name: str, url: str, filename: str, description: str, **kwargs):
-    """Download data from the WHO GHO OData API."""
+    """Download data from the WHO GHO OData API with pagination."""
     filepath = os.path.join(DATA_DIR, filename)
 
-    if os.path.exists(filepath):
+    if os.path.exists(filepath) and os.path.getsize(filepath) > 100:
         print(f"  ⏭️  {name}: Already exists, skipping.")
         return True
+    elif os.path.exists(filepath):
+        os.remove(filepath)  # Remove empty/corrupt file
 
     print(f"  ⬇️  {name}: {description}")
+    filter_sex = kwargs.get("filter_sex", None)
 
     try:
-        response = requests.get(url, timeout=120, headers={"Accept": "application/json"})
-        response.raise_for_status()
-        data = response.json()
+        # OData API paginates — collect all pages
+        all_records = []
+        next_url = url
 
-        if "value" not in data:
-            print(f"      ❌ Unexpected API response format")
+        while next_url:
+            response = requests.get(
+                next_url, timeout=120,
+                headers={"Accept": "application/json"},
+            )
+            response.raise_for_status()
+            data = response.json()
+
+            if "value" not in data:
+                break
+
+            all_records.extend(data["value"])
+            next_url = data.get("@odata.nextLink", None)
+            print(f"\r      Fetched {len(all_records)} records...", end="")
+
+        print()
+
+        if not all_records:
+            print(f"      ❌ No records returned")
             return False
 
-        df = pd.DataFrame(data["value"])
+        df = pd.DataFrame(all_records)
 
-        # Keep useful columns
-        keep_cols = [
-            c for c in df.columns
-            if c in [
-                "SpatialDim", "TimeDim", "Dim1", "NumericValue",
-                "Low", "High", "SpatialDimType", "Value",
-            ]
-        ]
-        if keep_cols:
-            df = df[keep_cols]
+        # Filter by sex if specified (e.g., SEX_BTSX = both sexes)
+        if filter_sex and "Dim1" in df.columns:
+            df = df[df["Dim1"] == filter_sex]
+
+        # Keep only country-level data
+        if "SpatialDimType" in df.columns:
+            df = df[df["SpatialDimType"] == "COUNTRY"]
+
+        # Select and rename useful columns
+        col_map = {
+            "SpatialDim": "country_code",
+            "TimeDim": "year",
+            "NumericValue": "value",
+            "Low": "ci_low",
+            "High": "ci_high",
+            "ParentLocation": "region",
+        }
+        keep = [c for c in col_map if c in df.columns]
+        df = df[keep].rename(columns=col_map)
 
         df.to_csv(filepath, index=False)
         print(f"      ✅ Saved: {filename} ({len(df)} rows, {len(df.columns)} columns)")
@@ -144,9 +177,15 @@ def download_who_api(name: str, url: str, filename: str, description: str, **kwa
 
 def download_open_food_facts():
     """
-    Download a filtered sample from Open Food Facts via Advanced Search API.
-    We request 10,000 products that have both nutriscore and nova data.
+    Download product-level nutrition data from Open Food Facts.
+    Strategy:
+      1. Try the API (fast, but may be down)
+      2. Fallback: download static CSV export and sample (slower, reliable)
+      3. Last resort: instructions for manual Kaggle download
     """
+    import time
+    import gzip
+
     filepath = os.path.join(DATA_DIR, OFF_CONFIG["filename"])
 
     if os.path.exists(filepath):
@@ -155,60 +194,117 @@ def download_open_food_facts():
 
     print(f"  ⬇️  open_food_facts: {OFF_CONFIG['description']}")
 
+    # --- Strategy 1: Try API ---
+    print("      Strategy 1: Trying API...")
+    headers = {
+        "User-Agent": "COMP5120-DataViz-Dashboard/1.0 (academic project)",
+    }
+    fields = ",".join([
+        "product_name", "brands", "categories",
+        "countries_tags", "nutriscore_grade", "nova_group",
+        "ecoscore_grade",
+        "energy-kcal_100g", "fat_100g", "saturated-fat_100g",
+        "sugars_100g", "salt_100g", "proteins_100g",
+        "fiber_100g", "carbohydrates_100g",
+    ])
+
     all_products = []
-    page_size = 1000
-    max_pages = 10  # 10 pages × 1000 = 10,000 products
+    api_works = True
 
-    for page in range(1, max_pages + 1):
-        print(f"      Fetching page {page}/{max_pages}...", end=" ")
-
-        params = {
-            "action": "process",
-            "tagtype_0": "nutrition_grades",
-            "tag_contains_0": "contains",
-            "tag_0": "",
-            "tagtype_1": "nova_groups",
-            "tag_contains_1": "contains",
-            "tag_1": "",
-            "sort_by": "unique_scans_n",
-            "page_size": page_size,
-            "page": page,
-            "json": 1,
-            "fields": ",".join([
-                "product_name", "brands", "categories",
-                "countries_tags", "nutriscore_grade", "nova_group",
-                "ecoscore_grade",
-                "energy-kcal_100g", "fat_100g", "saturated-fat_100g",
-                "sugars_100g", "salt_100g", "proteins_100g",
-                "fiber_100g", "carbohydrates_100g",
-            ]),
-        }
-
+    for page in range(1, 101):
+        if len(all_products) >= 10000:
+            break
         try:
-            resp = requests.get(OFF_CONFIG["url"], params=params, timeout=60)
+            url = (
+                f"https://world.openfoodfacts.org/api/v2/search"
+                f"?fields={fields}&page_size=100&page={page}"
+                f"&sort_by=popularity_key"
+            )
+            resp = requests.get(url, headers=headers, timeout=30)
             resp.raise_for_status()
-            data = resp.json()
-
-            products = data.get("products", [])
+            products = resp.json().get("products", [])
             if not products:
-                print("no more products.")
                 break
-
             all_products.extend(products)
-            print(f"{len(products)} products.")
-
+            print(f"\r      API: {len(all_products)}/10000 products...", end="")
+            time.sleep(0.3)
         except Exception as e:
-            print(f"error: {e}")
+            print(f"\n      API unavailable: {e}")
+            api_works = False
             break
 
     if all_products:
         df = pd.DataFrame(all_products)
         df.to_csv(filepath, index=False)
-        print(f"      ✅ Saved: {OFF_CONFIG['filename']} ({len(df)} rows, {len(df.columns)} columns)")
+        print(f"\n      ✅ Saved via API: {len(df)} rows")
         return True
-    else:
-        print(f"      ❌ No products retrieved.")
-        return False
+
+    # --- Strategy 2: Static CSV export (stream + sample) ---
+    print("      Strategy 2: Downloading static CSV export (this may take a few minutes)...")
+    static_url = "https://static.openfoodfacts.org/data/en.openfoodfacts.org.products.csv.gz"
+    gz_path = os.path.join(DATA_DIR, "_off_temp.csv.gz")
+
+    try:
+        # Stream download to avoid loading entire file in memory
+        print("      Downloading compressed file...", end=" ")
+        with requests.get(static_url, stream=True, timeout=300, headers=headers) as r:
+            r.raise_for_status()
+            total = 0
+            with open(gz_path, "wb") as f:
+                for chunk in r.iter_content(chunk_size=1024 * 1024):
+                    f.write(chunk)
+                    total += len(chunk)
+                    print(f"\r      Downloaded {total / (1024*1024):.0f} MB...", end="")
+                    # Stop after ~500 MB — enough for our sample
+                    if total > 500 * 1024 * 1024:
+                        break
+        print()
+
+        # Read with chunked processing, keeping only products with nutriscore + nova
+        print("      Filtering products with Nutri-Score and NOVA data...")
+        keep_cols = [
+            "product_name", "brands", "categories",
+            "countries_tags", "nutriscore_grade", "nova_group",
+            "ecoscore_grade",
+            "energy-kcal_100g", "fat_100g", "saturated-fat_100g",
+            "sugars_100g", "salt_100g", "proteins_100g",
+            "fiber_100g", "carbohydrates_100g",
+        ]
+
+        filtered = []
+        for chunk in pd.read_csv(
+            gz_path, sep="\t", compression="gzip",
+            usecols=lambda c: c in keep_cols,
+            chunksize=5000, on_bad_lines="skip",
+            low_memory=False,
+        ):
+            valid = chunk.dropna(subset=["nutriscore_grade", "nova_group"])
+            filtered.append(valid)
+            total_rows = sum(len(f) for f in filtered)
+            print(f"\r      Found {total_rows} valid products...", end="")
+            if total_rows >= 10000:
+                break
+
+        if filtered:
+            df = pd.concat(filtered, ignore_index=True).head(10000)
+            df.to_csv(filepath, index=False)
+            print(f"\n      ✅ Saved via static export: {len(df)} rows")
+            # Clean up temp file
+            os.remove(gz_path)
+            return True
+
+    except Exception as e:
+        print(f"\n      Static download failed: {e}")
+        if os.path.exists(gz_path):
+            os.remove(gz_path)
+
+    # --- Strategy 3: Manual instructions ---
+    print()
+    print("      ⚠️  Both automated methods failed.")
+    print("      📥 Please download manually from Kaggle:")
+    print("         https://www.kaggle.com/datasets/openfoodfacts/world-food-facts")
+    print(f"         Save as: {filepath}")
+    return False
 
 
 # ============================================================

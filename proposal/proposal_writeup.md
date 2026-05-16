@@ -8,31 +8,35 @@ We are creating an interactive dashboard using Python Shiny to answer three core
 
 1. **"What does the world eat?"** — We examine how calorie supplies and food sources vary across 180+ countries over decades.
 2. **"How healthy is it?"** — We link dietary patterns to health outcomes (obesity, malnutrition) and use ML models to uncover hidden relationships.
-3. **"What's really in our food?"** — We zoom into 45,000+ food products to assess nutritional quality using Nutri-Score and NOVA classifications.
+3. **"What's really in our food?"** — We zoom into thousands of food products to assess their nutritional quality using Nutri-Score and NOVA classifications.
 
 ### Why It Matters
 
-More than 800 million people go hungry while over a billion struggle with obesity — often in the same countries. The data to understand these issues exists, but it is scattered across different organizations and formats. Our dashboard pulls it together into one interactive experience so anyone can explore and learn from it.
+More than 800 million people go hungry while over a billion struggle with obesity — often in the same countries. The data to understand these issues exists, but it is scattered across different organizations and formats, making it nearly impossible for anyone to see the full picture in one place. Our dashboard pulls these fragmented sources together into a single interactive experience so that students, researchers, or anyone curious about food systems can explore and learn from it.
 
-### Our Datasets
+### Our Datasets and Why They Fit
 
-We combine four sources, linked through ISO-3 country codes:
+We selected datasets that directly serve each of our three questions:
 
-1. **FAOSTAT Food Balance Sheets** — Calorie, protein, and fat supply for 180+ countries (2010–2023).
-2. **Our World in Data** — Dietary trends (1961–2023) tied to obesity and life expectancy.
-3. **WHO Global Health Observatory** — Country-level obesity and malnutrition indicators.
-4. **Kaggle Global Food & Nutrition** — Product-level profiles for 45,000+ items (Nutri-Score, NOVA, macronutrients).
+| Question | Dataset | Coverage | Why It Fits |
+|----------|---------|----------|-------------|
+| **Q1: "What does the world eat?"** | Our World in Data — Calorie Supply | 200+ countries, 1961–2023 | Provides the long-term, country-level dietary trends needed to show how food consumption has shifted over six decades |
+| | Our World in Data — Food Composition | 200+ countries, 1961–2023 | Breaks down calories by food group (meat, cereals, dairy) to reveal what people actually eat |
+| **Q2: "How healthy is it?"** | Our World in Data — Obesity | 200+ countries, 1975–2016 | Links dietary patterns directly to obesity prevalence for correlation analysis |
+| | Our World in Data — Life Expectancy | 200+ countries, 1543–2023 | Connects diet to broader health outcomes beyond obesity |
+| | WHO GHO — Adult Obesity & Child Underweight | 190+ countries, 1975–2022 | Adds clinical health indicators with confidence intervals for ML modeling |
+| **Q3: "What's really in our food?"** | Open Food Facts | ~10,000 products | The only dataset granular enough to assess individual products by Nutri-Score, NOVA level, and macronutrients |
 
-Merging requires aligning country identifiers, time periods, and food category names across four different formats.
+All datasets are linked through standardized country identifiers and are downloaded automatically via a collection script in our repository.
 
 ### Why This Data is Hard to Visualize
 
-1. **Scale mismatch.** Country-level aggregates (180 nations × 60 years) must coexist with product-level detail (45,000+ items × 20+ attributes).
-2. **Space + time.** Geographic calorie patterns and their temporal evolution need linked, cross-filtered views.
-3. **High dimensionality.** 20+ nutritional attributes per product require careful encoding to avoid clutter.
-4. **Mixed types.** Numbers (calories), ranked scales (Nutri-Score A–E), and categories (food groups) each need different visual treatments, all working together.
+1. **Scale mismatch.** Country-level aggregates (180 nations across 60 years) must coexist with product-level detail (thousands of items with 20+ attributes) in one coherent interface.
+2. **Space and time together.** Geographic calorie patterns and their temporal evolution need linked, cross-filtered views — a single map or chart cannot capture both.
+3. **High dimensionality.** Over 20 nutritional attributes per product require careful encoding to avoid visual clutter.
+4. **Mixed variable types.** Numbers (calories), ranked scales (Nutri-Score A–E), and categories (food groups) each need different visual treatments, all working together seamlessly.
 
-*(Word count: ~290)*
+*(Word count: ~460)*
 
 ---
 
