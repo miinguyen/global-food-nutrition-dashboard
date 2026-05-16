@@ -45,7 +45,7 @@ All datasets are linked through standardized country identifiers and are downloa
 ### Interface Structure
 
 - **Navigation:** Three tabs, one per core question. A global header shows the project title and active tab.
-- **Layout per tab:** Left sidebar (~25% width) for filters, main panel (~75%) for charts in a responsive grid.
+- **Layout per tab:** Left sidebar (~25% width) for filters, main panel (~75%) for charts in a 2×2 responsive grid.
 - **Responsive behavior:** Charts sit side-by-side on desktop, stack vertically on smaller screens. Sidebar collapses on mobile.
 
 ---
@@ -55,30 +55,37 @@ All datasets are linked through standardized country identifiers and are downloa
 | Component | Details |
 |-----------|---------|
 | **Filters** | Year slider (1961–2023), Continent dropdown, Food Type dropdown |
-| **Chart 1 — Choropleth Map** | Shows per-capita calorie supply by country. Hover = tooltip with values. Click a country = cross-filters Chart 2. |
-| **Chart 2 — Line Chart** | Shows calorie trend over time for the selected country (bold) vs. global average (dashed). Updates when a country is clicked on the map. |
+| **Chart 1 — Global Calorie Map** (Choropleth) | Per-capita calorie supply across 200+ countries, color-coded by intake level. Hover = tooltip with values. Click a country = cross-filters Charts 2 & 3. |
+| **Chart 2 — Calorie Trend** (Line Chart) | Historical calorie supply (1961–2023) for the selected country (bold) vs. global average (dashed). Updates on map click. |
+| **Chart 3 — Food Source Breakdown** (Stacked Area) | How the composition of calories (meat, cereals, dairy, oils) has shifted over time for the selected country. |
+| **Chart 4 — Top/Bottom Countries** (Horizontal Bar) | Ranking of the highest and lowest calorie-supply countries for the selected year. |
 
 ### Tab 2: "How healthy is it?"
 
 | Component | Details |
 |-----------|---------|
 | **Filters** | Year slider (shared with Tab 1), Health Metric dropdown (Obesity / Malnutrition / Life Expectancy) |
-| **Chart 3 — Scatter Plot** | X = calorie supply, Y = selected health metric. Dots colored by continent. Brushing selects countries and shows a summary. |
-| **Chart 4 — Cluster Visualization** | K-means clustering of countries by diet, displayed as a 2D projection. Hover = dietary profile. Click a cluster = highlights those countries on Chart 3. |
+| **Chart 5 — Calories vs. Health** (Scatter Plot) | X = calorie supply, Y = selected health metric. Dots colored by continent. Brushing selects countries and shows a summary. |
+| **Chart 6 — Country Clusters** (2D Projection) | K-means clustering of countries by dietary profile, projected via PCA. Hover = dietary profile. Click a cluster = highlights those countries on Chart 5. |
+| **Chart 7 — Obesity Trend Map** (Animated Choropleth) | How obesity prevalence has spread globally over decades. Animated playback with year controls. |
+| **Chart 8 — Regression Dashboard** (Line + Residuals) | Obesity regression model with predicted vs. actual values and a feature importance bar chart. |
 
 ### Tab 3: "What's really in our food?"
 
 | Component | Details |
 |-----------|---------|
 | **Filters** | Food Category multi-select, NOVA level checkboxes, optional Nutri-Score filter |
-| **Chart 5 — Stacked Bar Chart** | Nutri-Score distribution (A–E) per food category. Click a bar segment = filters Chart 6. |
-| **Chart 6 — Scatter Plot** | Sugar (X) vs. Fat (Y) per product, colored by Nutri-Score, sized by calories. Brushing selects products for detail view. |
+| **Chart 9 — Nutri-Score Distribution** (Stacked Bar) | Nutri-Score (A–E) breakdown per food category. Click a bar segment = filters Charts 10 & 11. |
+| **Chart 10 — Sugar vs. Fat** (Scatter Plot) | Per-product sugar (X) vs. fat (Y), colored by Nutri-Score, sized by calories. Brushing selects products for detail view. |
+| **Chart 11 — NOVA Processing Levels** (Donut Chart) | Proportion of products by NOVA processing group (1–4). Click a segment = filters the other charts. |
+| **Chart 12 — Nutri-Score Predictor** (Interactive Form) | ML classifier that predicts Nutri-Score from user-input macronutrients (fat, sugar, salt, fiber, protein). |
 
-### Cross-Filtering
+### Interactivity & Cross-Filtering
 
-- Clicking a country on Tab 1 pre-selects it when navigating to Tab 2. The year slider persists across Tabs 1 and 2.
-- Tab 3 operates independently (different dataset).
-- All charts use Plotly (built-in zoom, pan, and export).
+- **Within tabs:** Clicking a country on the map (Chart 1) updates the trend line (Chart 2), food breakdown (Chart 3), and ranking highlight (Chart 4). Brushing the scatter plot (Chart 5) highlights countries in the cluster view (Chart 6). Clicking a Nutri-Score bar (Chart 9) filters the scatter (Chart 10) and donut (Chart 11).
+- **Across tabs:** Clicking a country on Tab 1 pre-selects it when navigating to Tab 2. The year slider persists across Tabs 1 and 2.
+- **Tab 3** operates independently (product-level dataset).
+- **All charts** use Plotly with built-in zoom, pan, hover tooltips, and PNG export.
 
 *(The wireframe sketch image is in `proposal/wireframe/dashboard_wireframe.png`.)*
 
