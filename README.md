@@ -5,7 +5,7 @@
 <br>
 
 <a href="#project-overview">
-  <img src="https://img.shields.io/badge/What_does_the_world_eat,_how_healthy_is_it,_and_what's_really_in_our_food%3F-FF6B35?style=for-the-badge&labelColor=FF6B35" alt="Research Question" />
+  <img src="https://readme-typing-svg.demolab.com?font=Poppins&weight=700&size=30&duration=4000&pause=1000&color=FF6B35&center=true&vCenter=true&width=900&height=60&lines=%F0%9F%8D%94+What+does+the+world+eat%2C+how+healthy+is+it%2C;and+what's+really+in+our+food%3F" alt="Research Question" />
 </a>
 
 <br><br>
