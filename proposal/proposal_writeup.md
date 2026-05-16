@@ -87,7 +87,13 @@ All datasets are linked through standardized country identifiers and are downloa
 - **Tab 3** operates independently (product-level dataset).
 - **All charts** use Plotly with built-in zoom, pan, hover tooltips, and PNG export.
 
-*(The wireframe sketch image is in `proposal/wireframe/dashboard_wireframe.png`.)*
+### Wireframe Sketches
+
+![Tab 1 — What does the world eat?](wireframe/tab1_what_world_eats.png)
+
+![Tab 2 — How healthy is it?](wireframe/tab2_how_healthy.png)
+
+![Tab 3 — What's really in our food?](wireframe/tab3_whats_in_food.png)
 
 ---
 
