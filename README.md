@@ -32,12 +32,12 @@ Our main question has three parts, each mapped to a dedicated dashboard section:
 2. **"How healthy is it?"** — We link dietary patterns to health outcomes (obesity, malnutrition, life expectancy) using WHO and OWID data, and apply ML models (country clustering, obesity regression) to uncover hidden relationships.
 3. **"What's really in our food?"** — We drill into 45,000+ food products to assess their nutritional quality (Nutri-Score A–E) and processing levels (NOVA classification), and predict quality scores using ML.
 
-### Alignment with Project Requirements
-Our project meets and exceeds the core requirements of the Project 2 assignment:
-- **Charts and Visualizations:** We've built over 6 charts using 4 distinct types, including interactive choropleth maps, time-series line charts, scatter plots, and bar charts. This easily covers the minimum requirement of 5 charts and 3 types.
-- **Interactivity:** The dashboard allows users to dynamically explore the data through interactive year and food-type filtering, alongside cross-filtered, linked visual components.
-- **Machine Learning and Analytics (COMP 5120):** We integrated several ML components directly into the workflow, such as predicting Nutri-Scores, clustering countries based on diet, and running obesity regression models.
-- **Reproducibility:** The entire pipeline is reproducible. We've included clear setup instructions, data collection scripts, and a complete dependencies list.
+### Dashboard Highlights
+
+- **Charts and Visualizations:** We've built **12 interactive charts** using **7 distinct types** — choropleth maps, line charts, stacked area charts, horizontal bar charts, scatter plots, donut charts, and 2D cluster projections — spanning all three tabs of the dashboard.
+- **Interactivity:** The dashboard allows users to dynamically explore data through year sliders, continent and food-type dropdowns, and cross-filtering between linked charts. Clicking a country on the map updates trend lines; brushing a scatter plot highlights individual products.
+- **Machine Learning and Analytics:** We integrated several ML components directly into the visual workflow — K-means clustering of countries by dietary profile, linear regression modeling of obesity drivers, and a Nutri-Score classifier that predicts food quality from macronutrient inputs.
+- **Reproducibility:** The entire data pipeline is automated via `python data/collect_data.py`, with a complete dependency list in `requirements.txt` and clear setup instructions for one-command replication.
 
 ---
 
