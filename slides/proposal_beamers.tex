@@ -1,0 +1,280 @@
+\documentclass[aspectratio=169, 10pt]{beamer}
+
+\usetheme{default}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{footline}[frame number]
+
+\usepackage{tikz}
+\usepackage[most]{tcolorbox}
+\usepackage{hyperref}
+\usepackage{graphicx}
+
+% ── Colors ─────────────────────────────────────────────────
+\definecolor{NGreen}{RGB}{107,143,74}
+\definecolor{NDarkGreen}{RGB}{58,90,42}
+\definecolor{NYellow}{RGB}{232,200,64}
+\definecolor{NOrange}{RGB}{212,133,74}
+\definecolor{NCream}{RGB}{250,246,240}
+\definecolor{NBrown}{RGB}{101,67,33}
+
+\setbeamercolor{background canvas}{bg=NCream}
+\setbeamercolor{normal text}{fg=NBrown}
+\setbeamercolor{footline}{fg=NGreen}
+
+% ── Box styles ─────────────────────────────────────────────
+\tcbset{
+  gbox/.style={colback=NGreen!8, colframe=NGreen, arc=2mm, boxrule=0.6pt,
+               left=2mm, right=2mm, top=1mm, bottom=1mm},
+  ybox/.style={colback=NYellow!10, colframe=NYellow!70!orange, arc=2mm, boxrule=0.6pt,
+               left=2mm, right=2mm, top=1mm, bottom=1mm},
+  obox/.style={colback=NOrange!8, colframe=NOrange, arc=2mm, boxrule=0.6pt,
+               left=2mm, right=2mm, top=1mm, bottom=1mm},
+  dbox/.style={colback=NDarkGreen, colframe=NDarkGreen, coltext=white, arc=2mm,
+               left=2mm, right=2mm, top=1mm, bottom=1mm},
+}
+
+\begin{document}
+
+% ═══════════ SLIDE 1 — TITLE ═══════════════════════════════
+\begin{frame}[plain]
+\vfill
+\begin{center}
+  {\color{NDarkGreen}\rule{0.5\textwidth}{1pt}}\\[5pt]
+  {\LARGE\bfseries\textcolor{NDarkGreen}{Global Food \& Nutrition Dashboard}}\\[5pt]
+  {\color{NDarkGreen}\rule{0.5\textwidth}{1pt}}\\[10pt]
+  {\normalsize COMP5120 --- Data Visualization}\\[8pt]
+  {\small
+    \textbf{Nguyen Thi Tra My} --- V202503042\\[1pt]
+    \textbf{Tran Thi Hoai Phuong} --- V202502962}\\[10pt]
+  \begin{tcolorbox}[dbox, width=0.55\textwidth, halign=center]
+    \footnotesize \textbf{GitHub:}
+    \href{https://github.com/miinguyen/global-food-nutrition-dashboard}%
+         {github.com/miinguyen/global-food-nutrition-dashboard}
+  \end{tcolorbox}
+\end{center}
+\vfill
+\end{frame}
+
+% ═══════════ SLIDE 2 — INITIAL PROJECT PLAN ════════════════
+\begin{frame}
+\begin{center}
+  {\large\bfseries\textcolor{NDarkGreen}{Initial Project Plan}}
+\end{center}
+\vspace{-2pt}
+\begin{columns}[T]
+  \begin{column}{0.54\textwidth}
+    \begin{tcolorbox}[gbox, title={\footnotesize\bfseries Goal},
+      coltitle=white, colbacktitle=NGreen]
+      \footnotesize
+      Build an interactive \textbf{Python Shiny} dashboard unifying
+      fragmented global food data into one visual experience.
+    \end{tcolorbox}
+    \vspace{2pt}
+    \begin{tcolorbox}[ybox, title={\footnotesize\bfseries Core Questions},
+      coltitle=NBrown, colbacktitle=NYellow!35]
+      \footnotesize
+      \begin{enumerate}\setlength\itemsep{0pt}
+        \item \textbf{What does the world eat?} --- Calorie trends, 180+ countries
+        \item \textbf{How healthy is it?} --- Diet vs.\ obesity \& malnutrition
+        \item \textbf{What's really in our food?} --- Nutri-Score \& NOVA analysis
+      \end{enumerate}
+    \end{tcolorbox}
+  \end{column}
+  \begin{column}{0.43\textwidth}
+    \begin{tcolorbox}[obox, title={\footnotesize\bfseries Why It Matters},
+      coltitle=white, colbacktitle=NOrange]
+      \footnotesize
+      800\,M+ go hungry while 1\,B+ are obese --- often in the \emph{same}
+      countries. Data exists but is scattered; our dashboard brings it together.
+    \end{tcolorbox}
+    \vspace{2pt}
+    \begin{tcolorbox}[gbox, title={\footnotesize\bfseries Timeline},
+      coltitle=white, colbacktitle=NGreen]
+      \footnotesize
+      \begin{tabular}{@{}rl@{}}
+        May 18 & Proposal\\
+        May 25 & Data pipeline\\
+        Jun 1  & Dashboard MVP\\
+        Jun 7  & Final submission\\
+      \end{tabular}
+    \end{tcolorbox}
+  \end{column}
+\end{columns}
+\end{frame}
+
+% ═══════════ SLIDE 3 — DATASET DESCRIPTION ═════════════════
+\begin{frame}
+\begin{center}
+  {\large\bfseries\textcolor{NDarkGreen}{Dataset Description}}
+\end{center}
+\vspace{-2pt}
+\begin{columns}[T]
+  \begin{column}{0.32\textwidth}
+    \begin{tcolorbox}[ybox, title={\footnotesize\bfseries Q1: What does the world eat?},
+      coltitle=NBrown, colbacktitle=NYellow!35]
+      \footnotesize
+      \textbf{Data:} OWID --- Calorie Supply \& Food Composition\\[1pt]
+      \textbf{Scope:} 200+ countries, 1961--2023\\[1pt]
+      Per-capita calories by food group.
+    \end{tcolorbox}
+  \end{column}
+  \begin{column}{0.32\textwidth}
+    \begin{tcolorbox}[gbox, title={\footnotesize\bfseries Q2: How healthy is it?},
+      coltitle=white, colbacktitle=NGreen]
+      \footnotesize
+      \textbf{Data:} OWID Obesity \& Life Exp.; WHO GHO\\[1pt]
+      \textbf{Scope:} 200+ countries, 1975--2023\\[1pt]
+      Obesity, life expectancy, child underweight.
+    \end{tcolorbox}
+  \end{column}
+  \begin{column}{0.32\textwidth}
+    \begin{tcolorbox}[obox, title={\footnotesize\bfseries Q3: What's in our food?},
+      coltitle=white, colbacktitle=NOrange]
+      \footnotesize
+      \textbf{Data:} Open Food Facts\\[1pt]
+      \textbf{Scope:} $\sim$10\,000 products\\[1pt]
+      Nutri-Score (A--E), NOVA (1--4), macros.
+    \end{tcolorbox}
+  \end{column}
+\end{columns}
+\vspace{3pt}
+\begin{tcolorbox}[dbox]
+  \footnotesize
+  \textbf{Integration:} All country-level sources linked via \textbf{ISO-3166 codes}
+  with automated download scripts.
+  Key challenge: reconciling 60-year national aggregates with product-level granularity.
+\end{tcolorbox}
+\end{frame}
+
+% ═══════════ SLIDE 4 — VISUALIZATION METHODS ══════════════
+\begin{frame}
+\begin{center}
+  {\large\bfseries\textcolor{NDarkGreen}{Planned Visualizations}}
+\end{center}
+\vspace{-2pt}
+\begin{columns}[T]
+  % LEFT — chart list
+  \begin{column}{0.38\textwidth}
+    \begin{tcolorbox}[gbox, title={\footnotesize\bfseries 12 Interactive Charts (Plotly)},
+      coltitle=white, colbacktitle=NGreen]
+      \footnotesize
+      \begin{itemize}\setlength\itemsep{0pt}
+        \item Choropleth maps (calorie \& obesity)
+        \item Line \& stacked-area trends
+        \item Scatter with brushing
+        \item Horizontal bar rankings
+        \item Donut \& stacked-bar charts
+      \end{itemize}
+    \end{tcolorbox}
+    \vspace{2pt}
+    \begin{tcolorbox}[ybox]
+      \footnotesize
+      \textbf{Interactivity:} Cross-filtering, year sliders,
+      animated playback, click-to-drill across tabs.
+    \end{tcolorbox}
+  \end{column}
+  % RIGHT — wireframe images
+  \begin{column}{0.59\textwidth}
+    \begin{center}
+      \includegraphics[width=0.48\textwidth]{../proposal/wireframe/tab1_what_world_eats.png}\hfill
+      \includegraphics[width=0.48\textwidth]{../proposal/wireframe/tab2_how_healthy.png}
+    \end{center}
+    \vspace{-3pt}
+    \begin{center}
+      \footnotesize\textcolor{NDarkGreen}{\textbf{Wireframes:} Tab\,1 ``What does the world eat?'' \& Tab\,2 ``How healthy is it?''}
+    \end{center}
+  \end{column}
+\end{columns}
+\end{frame}
+
+% ═══════════ SLIDE 5 — ANALYTICAL / ML METHODS ════════════
+\begin{frame}
+\begin{center}
+  {\large\bfseries\textcolor{NDarkGreen}{Analytical \& ML Methods}}
+\end{center}
+\vspace{-2pt}
+\begin{columns}[T]
+  % LEFT — ML models
+  \begin{column}{0.38\textwidth}
+    \begin{tcolorbox}[obox, title={\footnotesize\bfseries Machine Learning Models},
+      coltitle=white, colbacktitle=NOrange]
+      \footnotesize
+      \begin{enumerate}\setlength\itemsep{1pt}
+        \item \textbf{K-means + PCA}\\
+              Cluster countries by dietary profile.
+        \item \textbf{Regression}\\
+              Predict obesity from food-group shares.
+        \item \textbf{Nutri-Score Classifier}\\
+              Predict grade A--E from macronutrients.
+      \end{enumerate}
+    \end{tcolorbox}
+    \vspace{2pt}
+    \begin{tcolorbox}[ybox]
+      \footnotesize
+      \textbf{Tech stack:}\\
+      Python Shiny $\cdot$ Plotly $\cdot$ scikit-learn $\cdot$ Parquet
+    \end{tcolorbox}
+  \end{column}
+  % RIGHT — Tab 3 wireframe
+  \begin{column}{0.59\textwidth}
+    \begin{center}
+      \includegraphics[width=0.68\textwidth]{../proposal/wireframe/tab3_whats_in_food.png}
+    \end{center}
+    \vspace{-3pt}
+    \begin{center}
+      \footnotesize\textcolor{NDarkGreen}{\textbf{Wireframe:} Tab\,3 ``What's really in our food?'' --- includes ML predictor}
+    \end{center}
+  \end{column}
+\end{columns}
+\end{frame}
+
+% ═══════════ SLIDE 6 — TASKS & NEXT STEPS ═════════════════
+\begin{frame}
+\begin{center}
+  {\large\bfseries\textcolor{NDarkGreen}{Task Allocation \& Next Steps}}
+\end{center}
+\vspace{-2pt}
+\begin{columns}[T]
+  \begin{column}{0.48\textwidth}
+    \begin{tcolorbox}[gbox, title={\footnotesize\bfseries Nguyen Thi Tra My},
+      coltitle=white, colbacktitle=NGreen]
+      \footnotesize
+      \begin{itemize}\setlength\itemsep{0pt}
+        \item Tab 1 \& 2 visualizations (Charts 1--8)
+        \item K-means clustering \& PCA
+        \item Obesity regression model
+        \item Data pipeline \& merging
+      \end{itemize}
+    \end{tcolorbox}
+  \end{column}
+  \begin{column}{0.48\textwidth}
+    \begin{tcolorbox}[obox, title={\footnotesize\bfseries Tran Thi Hoai Phuong},
+      coltitle=white, colbacktitle=NOrange]
+      \footnotesize
+      \begin{itemize}\setlength\itemsep{0pt}
+        \item Tab 3 visualizations (Charts 9--12)
+        \item Nutri-Score ML classifier
+        \item Dashboard UI \& styling
+        \item Documentation \& report
+      \end{itemize}
+    \end{tcolorbox}
+  \end{column}
+\end{columns}
+\vspace{3pt}
+\begin{tcolorbox}[dbox, halign=center]
+  \footnotesize
+  \textbf{Roadmap:}\;
+  Proposal (May 18) $\rightarrow$
+  Data Pipeline (May 25) $\rightarrow$
+  MVP (Jun 1) $\rightarrow$
+  Final (Jun 7)
+\end{tcolorbox}
+\vspace{3pt}
+\begin{center}
+  \footnotesize\textcolor{NDarkGreen}{\textbf{Repository:}}
+  \href{https://github.com/miinguyen/global-food-nutrition-dashboard}%
+       {\textcolor{NOrange}{github.com/miinguyen/global-food-nutrition-dashboard}}
+\end{center}
+\end{frame}
+
+\end{document}
