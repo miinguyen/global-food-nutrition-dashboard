@@ -2,7 +2,7 @@
 
 **Project:** Global Food & Nutrition Dashboard  
 **Course:** COMP5120 — Data Visualization (Spring 2026)  
-**Date:** May 16, 2026  
+**Date:** May 18, 2026  
 **Source directory:** `data/processed/`
 
 ---
@@ -13,10 +13,12 @@ After running `data/processing.py`, four output files are generated. Each table 
 
 | File | Format | Rows | Description | Dashboard Usage |
 |------|--------|------|-------------|-----------------|
-| `country_yearly` | `.parquet` / `.csv` | 10,418 | Country-level nutrition, diet composition, obesity, and life expectancy by year (1961–2023) | Tab 1 (Choropleth, Trend Lines, Stacked Area, Bar Chart) & Tab 2 (Scatter, Parallel Coordinates) |
-| `country_health` | `.parquet` / `.csv` | 7,778 | WHO adult obesity and child underweight prevalence with confidence intervals (1990–2023) | Tab 2 (Obesity vs. Underweight Scatter, Dual-Burden Analysis) |
-| `products` | `.parquet` / `.csv` | 8,058 | Product-level nutritional profiles from Open Food Facts with Nutri-Score and NOVA classification | Tab 3 (Nutri-Score Distribution, Radar Chart, NOVA Breakdown, ML Classifier) |
-| `country_meta` | `.csv` only | 193 | Unique country → continent lookup table | Internal reference for filtering and labeling |
+| `country_yearly` | `.parquet` / `.csv` | 10,417 | Country-level nutrition, diet composition, and life expectancy by year (1961–2023) | Tab 1 (Choropleth, Trend Lines, Stacked Area, Bar Chart) & Tab 2 (Scatter, Parallel Coordinates) |
+| `country_health` | `.parquet` / `.csv` | 7,777 | WHO adult obesity and child underweight prevalence with confidence intervals (1990–2023) | Tab 2 (Obesity vs. Underweight Scatter, Dual-Burden Analysis, Obesity Trends) |
+| `products` | `.parquet` / `.csv` | 8,057 | Product-level nutritional profiles from Open Food Facts with Nutri-Score and NOVA classification | Tab 3 (Nutri-Score Distribution, Radar Chart, NOVA Breakdown, ML Classifier) |
+| `country_meta` | `.csv` only | 192 | Unique country → continent lookup table | Internal reference for filtering and labeling |
+
+> **Design note:** Obesity prevalence is stored exclusively in `country_health` (WHO source with confidence intervals), not in `country_yearly`. This eliminates redundancy between the OWID and WHO obesity estimates, which derive from similar underlying NCD-RisC data. Dashboard views that require both diet composition and obesity join the two tables on `(iso3, year)`.
 
 ---
 
@@ -24,7 +26,7 @@ After running `data/processing.py`, four output files are generated. Each table 
 
 ### What is a row?
 
-Each row represents **one country in one year**. For example, row `(AFG, 1961)` contains Afghanistan's total calorie supply, the caloric contribution of 26 individual food groups, aggregated macro-group totals, obesity prevalence, and life expectancy — all for the year 1961.
+Each row represents **one country in one year**. For example, row `(AFG, 1961)` contains Afghanistan's total calorie supply, the caloric contribution of 26 individual food groups, aggregated macro-group totals, and life expectancy — all for the year 1961.
 
 ### Column Definitions
 
@@ -124,11 +126,10 @@ These columns are computed sums of the individual food groups above, designed fo
 
 > **Note:** The 8 macro groups should sum approximately to the `calories` column. Minor discrepancies may exist due to rounding in the source data.
 
-#### Health Indicators
+#### Life Expectancy
 
 | Column | Type | Unit | Description |
 |--------|------|------|-------------|
-| `obesity_pct` | float | % | Prevalence of obesity among adults (BMI ≥ 30). Source: OWID (derived from NCD-RisC). Available 1990–2022 only; earlier years are `NaN`. |
 | `life_exp` | float | years | Life expectancy at birth (both sexes). Source: OWID (derived from UN World Population Prospects). Available 1950–2023. |
 
 ---
@@ -137,7 +138,7 @@ These columns are computed sums of the individual food groups above, designed fo
 
 ### What is a row?
 
-Each row represents **one country in one year** with WHO-sourced health indicator data. Some country-year pairs may appear more than once if both obesity and underweight survey data exist for that year.
+Each row represents **one country in one year** with WHO-sourced health indicator data. This is the **single source of truth** for obesity prevalence in the dashboard.
 
 ### Column Definitions
 
@@ -158,6 +159,7 @@ Each row represents **one country in one year** with WHO-sourced health indicato
 
 - **Obesity data** is available annually (modeled estimates) for most countries from 1990–2022.
 - **Underweight data** is only available for specific survey years (irregular), so most rows have `NaN` for underweight columns.
+- This table is the **sole provider of obesity data** in the dashboard. To analyze obesity alongside diet composition, join to `country_yearly` on `(iso3, year)`.
 - This table is useful for the **dual burden of malnutrition** analysis: countries can simultaneously have high obesity and high child underweight.
 
 ---
@@ -166,7 +168,7 @@ Each row represents **one country in one year** with WHO-sourced health indicato
 
 ### What is a row?
 
-Each row represents **one food product** from the Open Food Facts database. Products were collected via the Open Food Facts API (10,000 entries requested, 8,058 retained after filtering for valid Nutri-Score grades).
+Each row represents **one food product** from the Open Food Facts database. Products were collected via the Open Food Facts API (10,000 entries requested, 8,057 retained after filtering for valid Nutri-Score grades).
 
 ### Column Definitions
 
@@ -228,9 +230,9 @@ Each row represents **one unique country** and its continent assignment.
 | Asia | 47 |
 | Europe | 43 |
 | Other | 4 |
-| **Total** | **193** |
+| **Total** | **192** |
 
-> Countries labeled `Other` include Hong Kong, Macao, Netherlands Antilles, and New Caledonia — territories that don't fit neatly into a single continent classification.
+> Countries labeled `Other` include territories that don't fit neatly into a single continent classification.
 
 ---
 
@@ -241,10 +243,10 @@ Each row represents **one unique country** and its continent assignment.
 | Metric | Value |
 |--------|-------|
 | Year range | 1961–2023 |
-| Countries covered | 193 |
+| Countries covered | 192 |
+| Columns | 39 |
 | Average rows per country | ~54 |
 | Calorie range | ~1,280 – ~3,900 kcal/capita/day |
-| Obesity range | ~0.3% – ~75% (Pacific islands highest) |
 | Life expectancy range | ~26 – ~85 years |
 
 ### `country_health` — WHO Indicators
@@ -253,15 +255,18 @@ Each row represents **one unique country** and its continent assignment.
 |--------|-------|
 | Year range | 1986–2024 (underweight surveys span wider) |
 | Countries covered | ~200 (WHO member states) |
+| Columns | 10 |
 | Obesity data availability | Annual modeled estimates for most countries |
 | Underweight data availability | Sporadic survey years only |
+| Obesity range | ~0.3% – ~75% (Pacific islands highest) |
 
 ### `products` — Open Food Facts
 
 | Metric | Value |
 |--------|-------|
-| Total products (after filtering) | 8,058 |
-| Nutri-Score distribution | a: ~8%, b: ~12%, c: ~15%, d: ~30%, e: ~35% |
+| Total products (after filtering) | 8,057 |
+| Columns | 15 |
+| Nutri-Score distribution | a: ~22%, b: ~11%, c: ~19%, d: ~23%, e: ~24% |
 | Most common NOVA group | 4 (ultra-processed) |
 | Nutritional completeness | ~40% of products have full nutritional panels |
 | Top countries | France, Germany, United States |
@@ -278,9 +283,9 @@ Each row represents **one unique country** and its continent assignment.
 │  year              │ year │  year              │
 │  calories          │      │  who_obesity_pct   │
 │  grp_cereals...    │      │  underweight_pct   │
-│  obesity_pct       │      │  ci_low / ci_high  │
-│  life_exp          │      │  region            │
-│  continent         │      │  continent         │
+│  life_exp          │      │  ci_low / ci_high  │
+│  continent         │      │  region            │
+│                    │      │  continent         │
 └────────┬───────────┘      └──────────────────┘
          │
          │ iso3
@@ -298,7 +303,7 @@ Each row represents **one unique country** and its continent assignment.
                            (standalone — no join key)
 ```
 
-- **`country_yearly`** and **`country_health`** can be joined on `(iso3, year)` to combine OWID nutrition data with WHO health indicators.
+- **`country_yearly`** and **`country_health`** can be joined on `(iso3, year)` to combine OWID nutrition data with WHO health indicators. This is the **required** approach for any analysis involving both diet composition and obesity.
 - **`country_meta`** provides a lookup for country names and continent labels.
 - **`products`** is a standalone table — it does not join with the country-level tables. It powers the product-level analysis in Tab 3.
 

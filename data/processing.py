@@ -318,8 +318,12 @@ def clean_food_facts():
 # Step 2: Merge into Master Tables
 # ============================================================
 
-def merge_country_yearly(cal, comp, obesity, life_exp, continent_lookup):
-    """Merge country-level datasets into one master table."""
+def merge_country_yearly(cal, comp, life_exp, continent_lookup):
+    """Merge country-level datasets into one master table.
+
+    Note: Obesity data is intentionally excluded from this table to avoid
+    redundancy with the WHO-sourced obesity in ``country_health``.
+    """
     print("\n  🔗 Merging country_yearly...")
 
     # Start with calorie supply (most complete)
@@ -328,10 +332,6 @@ def merge_country_yearly(cal, comp, obesity, life_exp, continent_lookup):
     # Merge food composition (drop entity col to avoid duplicates)
     comp_cols = [c for c in comp.columns if c not in ("entity",)]
     master = master.merge(comp_cols and comp[comp_cols], on=["iso3", "year"], how="left")
-
-    # Merge obesity
-    obesity_slim = obesity[["iso3", "year", "obesity_pct"]]
-    master = master.merge(obesity_slim, on=["iso3", "year"], how="left")
 
     # Merge life expectancy
     life_slim = life_exp[["iso3", "year", "life_exp"]]
@@ -389,7 +389,6 @@ def main():
 
     cal = clean_calorie_supply()
     comp = clean_food_composition()
-    obesity = clean_obesity()
     life_exp = clean_life_expectancy()
     who_obesity = clean_who_obesity()
     who_underweight = clean_who_underweight()
@@ -406,7 +405,7 @@ def main():
     print("\n📋 Step 2: Merging into master tables...")
     print("-" * 40)
 
-    country_yearly = merge_country_yearly(cal, comp, obesity, life_exp, continent_lookup)
+    country_yearly = merge_country_yearly(cal, comp, life_exp, continent_lookup)
     country_health = merge_country_health(who_obesity, who_underweight, continent_lookup)
 
     # --- Step 3: Save ---

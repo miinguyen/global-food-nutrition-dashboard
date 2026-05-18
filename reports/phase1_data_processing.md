@@ -2,7 +2,7 @@
 
 **Project:** Global Food & Nutrition Dashboard  
 **Course:** COMP5120 — Data Visualization (Spring 2026)  
-**Date:** May 16, 2026  
+**Date:** May 18, 2026  
 **Script:** [`data/processing.py`](../data/processing.py)
 
 ---
@@ -15,7 +15,8 @@ Phase 1 transforms the seven raw datasets collected in the data-gathering stage 
 2. **Clean & filter** — Remove aggregate/continental rows, cast data types, handle missing values, and drop outliers.
 3. **Enrich** — Add continent labels via WHO region mapping and a static ISO-3 → Continent lookup.
 4. **Merge** — Combine related datasets into unified master tables joined on `iso3` + `year`.
-5. **Export** — Save outputs as Parquet (for app performance) and CSV (for inspection).
+5. **Eliminate redundancy** — Obesity prevalence is sourced exclusively from WHO (in `country_health`), avoiding duplication with the OWID-derived estimate.
+6. **Export** — Save outputs as Parquet (for app performance) and CSV (for inspection).
 
 ---
 
@@ -25,7 +26,7 @@ Phase 1 transforms the seven raw datasets collected in the data-gathering stage 
 |---|------|--------|------|---------|------|-------------|
 | 1 | `owid_calorie_supply.csv` | OWID | 13,265 | 4 | 393 KB | Daily per-capita calorie supply by country & year (1961–2023) |
 | 2 | `owid_food_composition.csv` | OWID | 13,032 | 28 | 2.97 MB | Caloric breakdown by 26 food groups per country & year |
-| 3 | `owid_obesity.csv` | OWID | 6,798 | 4 | 187 KB | Adult obesity prevalence (BMI ≥ 30), 1990–2022 |
+| 3 | `owid_obesity.csv` | OWID | 6,798 | 4 | 187 KB | Adult obesity prevalence (BMI ≥ 30), 1990–2022 — **not used in final output** (see §3.3) |
 | 4 | `owid_life_expectancy.csv` | OWID | 21,565 | 4 | 605 KB | Life expectancy at birth, 1950–2023 |
 | 5 | `who_obesity_adults.csv` | WHO GHO API | 6,568 | 6 | 326 KB | Adult obesity (%) with confidence intervals & WHO region |
 | 6 | `who_underweight_children.csv` | WHO GHO API | 2,255 | 6 | 72 KB | Underweight children under 5 (%) with CIs & WHO region |
@@ -41,11 +42,11 @@ Phase 1 transforms the seven raw datasets collected in the data-gathering stage 
 
 Each raw CSV undergoes the following transformations:
 
-#### OWID Datasets (files 1–4)
+#### OWID Datasets (files 1, 2, 4)
 
 | Operation | Details |
 |-----------|---------|
-| Rename columns | `code` → `iso3`, `daily_calories` → `calories`, `life_expectancy_0` → `life_exp`, verbose obesity column → `obesity_pct` |
+| Rename columns | `code` → `iso3`, `daily_calories` → `calories`, `life_expectancy_0` → `life_exp` |
 | Drop aggregates | Remove rows where `iso3` is null or starts with `OWID_` (e.g., `OWID_WRL`, `OWID_EUR`) |
 | Cast types | `year` → `int`, numeric columns → `float` |
 | Filter range | Life expectancy limited to 1960+ to align with nutrition data |
@@ -119,17 +120,18 @@ Countries not matched by either method are labeled `"Other"`.
 
 #### Table 1: `country_yearly`
 
-The primary analysis table, built by left-joining on `(iso3, year)`:
+The primary nutrition and diet analysis table, built by left-joining on `(iso3, year)`:
 
 ```
 owid_calorie_supply (base)
   ← LEFT JOIN owid_food_composition
-  ← LEFT JOIN owid_obesity
   ← LEFT JOIN owid_life_expectancy
   + continent mapping
 ```
 
-**Used by:** Tab 1 (Choropleth, Trend Line, Stacked Area, Bar Chart) and Tab 2 (Scatter, Clustering, Parallel Coordinates)
+> **Design decision:** OWID obesity (`owid_obesity.csv`) is intentionally excluded from this table. Both OWID and WHO provide adult obesity prevalence derived from similar underlying NCD-RisC estimates, so including both would create data redundancy. The WHO source in `country_health` is preferred because it provides age-standardized estimates with 95% confidence intervals and WHO region labels, enabling richer analysis. Dashboard views that require obesity data join to `country_health` on `(iso3, year)`.
+
+**Used by:** Tab 1 (Choropleth, Trend Line, Stacked Area, Bar Chart) and Tab 2 (Scatter via join to `country_health`)
 
 #### Table 2: `country_health`
 
@@ -141,7 +143,7 @@ who_obesity_adults
   + continent mapping
 ```
 
-**Used by:** Tab 2 (Obesity vs. Underweight scatter, Dual-Burden chart)
+**Used by:** Tab 2 (Obesity vs. Underweight scatter, Dual-Burden chart, Obesity trends)
 
 #### Table 3: `products`
 
@@ -166,12 +168,12 @@ Additionally, a `country_meta.csv` is exported containing unique `(iso3, entity,
 
 ## 4. Output Summary
 
-| Output File | Rows | Parquet Size | CSV Size | Key Columns |
-|-------------|------|-------------|----------|-------------|
-| `country_yearly.parquet` | 10,418 | 3.3 MB | 3.9 MB | `iso3`, `year`, `calories`, `grp_cereals`…`grp_other`, `obesity_pct`, `life_exp`, `continent` |
-| `country_health.parquet` | 7,778 | 220 KB | 475 KB | `iso3`, `year`, `who_obesity_pct`, `underweight_pct`, `ci_low`, `ci_high`, `continent` |
-| `products.parquet` | 8,058 | 247 KB | 1.3 MB | `product_name`, `nutriscore_grade`, `nova_group`, `energy-kcal_100g`, `fat_100g`, `sugars_100g`, … |
-| `country_meta.csv` | 193 | — | 3.9 KB | `iso3`, `entity`, `continent` |
+| Output File | Rows | Columns | Key Columns |
+|-------------|------|---------|-------------|
+| `country_yearly.parquet` | 10,417 | 39 | `iso3`, `year`, `calories`, `grp_cereals`…`grp_other`, `life_exp`, `continent` |
+| `country_health.parquet` | 7,777 | 10 | `iso3`, `year`, `who_obesity_pct`, `underweight_pct`, `ci_low`, `ci_high`, `continent` |
+| `products.parquet` | 8,057 | 15 | `product_name`, `nutriscore_grade`, `nova_group`, `energy-kcal_100g`, `fat_100g`, `sugars_100g`, … |
+| `country_meta.csv` | 192 | 3 | `iso3`, `entity`, `continent` |
 
 ---
 
@@ -182,23 +184,23 @@ Additionally, a `country_meta.csv` is exported containing unique `(iso3, entity,
 | Issue | Impact | Mitigation |
 |-------|--------|------------|
 | **Open Food Facts — missing nutrition values** | ~60% of products lack `fat_100g`, `sugars_100g`, etc. | Dashboard charts handle `NaN` gracefully; ML classifier uses available subset |
-| **Sparse obesity data before 1990** | Tab 2 scatter plot has gaps for early years | Dashboard year slider defaults to 1990–2022 |
-| **WHO underweight data** (~2,255 raw rows) | Limited country-year coverage | Outer join preserves all available data; NaN values handled at chart level |
+| **Obesity data only in `country_health`** | Dashboard views needing obesity must join to `country_health` on `(iso3, year)` | Avoids redundancy; join is lightweight |
+| **WHO underweight data** (~2,254 raw rows) | Limited country-year coverage | Outer join preserves all available data; NaN values handled at chart level |
 | **Continent "Other" label** | Small island nations may not be in the lookup table | Acceptable — affects < 5 countries |
 | **Duplicate WHO rows** | Some country-year pairs appear twice (WHO + underweight surveys) | Acceptable — grouped aggregations in charts handle duplicates |
 
 ### Data Integrity Checks
 
-All validations passed after running `processing.py` (verified May 16, 2026):
+All validations passed after running `processing.py` (verified May 18, 2026):
 
 - [x] All `iso3` codes are exactly 3 uppercase letters
 - [x] No `OWID_*` aggregate rows remain in output tables
 - [x] `year` column is integer type in all tables
 - [x] `country_yearly` has no duplicate `(iso3, year)` pairs
 - [x] Macro group columns (`grp_*`) sum approximately to total `calories` column
-- [x] `nutriscore_grade` contains only lowercase {a, b, c, d, e} — 8,058 valid products
-- [x] `products.parquet` scaled from 201 → 10,001 raw → 8,058 after filtering
-- [x] Continent distribution covers Africa (47), Americas (35), Asia (47), Europe (43), Other (4)
+- [x] `country_yearly` does **not** contain `obesity_pct` — obesity is exclusively in `country_health`
+- [x] `nutriscore_grade` contains only lowercase {a, b, c, d, e} — 8,057 valid products
+- [x] Continent distribution covers Africa, Americas, Asia, Europe, Other
 
 ---
 
