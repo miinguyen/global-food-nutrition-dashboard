@@ -5,6 +5,7 @@
 \setbeamertemplate{footline}[frame number]
 
 \usepackage{tikz}
+\usetikzlibrary{positioning, calc}
 \usepackage[most]{tcolorbox}
 \usepackage{hyperref}
 \usepackage{graphicx}
@@ -201,7 +202,66 @@
 \end{tcolorbox}
 \end{frame}
 
-% ═══════════ SLIDE 5 — PLANNED VISUALIZATIONS ══════════════
+% ═══════════ SLIDE 5 — DATA PIPELINE & RELATIONSHIPS ═══════
+\begin{frame}
+\begin{center}
+  {\large\bfseries\textcolor{NDarkGreen}{Data Pipeline \& Table Relationships}}
+\end{center}
+\vspace{-4pt}
+\centering
+\begin{tikzpicture}[
+  scale=0.73, transform shape,
+  every node/.style={font=\normalsize},
+  src/.style={rounded corners=3pt, draw=NBrown!60, fill=NYellow!18,
+              minimum height=0.7cm, minimum width=2.5cm, align=center},
+  proc/.style={rounded corners=3pt, draw=NOrange, fill=NOrange!20,
+               minimum height=0.7cm, minimum width=5cm, align=center,
+               font=\normalsize\bfseries},
+  tbl/.style={rounded corners=3pt, draw=NDarkGreen, fill=NGreen!12,
+              minimum height=1.1cm, minimum width=3.5cm, align=center},
+  arr/.style={->, >=stealth, line width=1.2pt, NGreen!70!black},
+  lnk/.style={<->, >=stealth, line width=2pt, NOrange},
+  dlnk/.style={->, >=stealth, line width=1pt, NBrown!50, dashed},
+]
+  % Row 1: Raw sources
+  \node[src] (s1) at (0,   0) {OWID\newline Calories};
+  \node[src] (s2) at (2.8, 0) {OWID\newline Food Comp.};
+  \node[src] (s3) at (5.6, 0) {OWID\newline Life Exp.};
+  \node[src] (s4) at (8.4, 0) {WHO\newline Obesity};
+  \node[src] (s5) at (11.2,0) {WHO\newline Underweight};
+  \node[src] (s6) at (14,  0) {Open\newline Food Facts};
+  \node[font=\normalsize\itshape\color{NBrown!60}] at (-1.4, 0) {6 raw CSVs};
+  % Row 2: Processing
+  \node[proc] (proc) at (7, -1.8) {\texttt{data/processing.py}};
+  \foreach \s in {s1,s2,s3,s4,s5,s6}
+    \draw[arr] (\s.south) -- (proc.north -| \s.south);
+  % Row 3: Output tables
+  \node[tbl] (cy) at (2.5, -3.8)
+    {\textbf{country\_yearly}\newline {\small 10,417 rows $\times$ 39 cols}\newline {\small calories, grp\_*, life\_exp}};
+  \node[tbl] (ch) at (7,   -3.8)
+    {\textbf{country\_health}\newline {\small 7,777 rows $\times$ 10 cols}\newline {\small obesity\%, underweight\%, CIs}};
+  \node[tbl] (pr) at (11.5,-3.8)
+    {\textbf{products}\newline {\small 8,057 rows $\times$ 15 cols}\newline {\small nutriscore, nova, macros}};
+  \draw[arr] (proc.south) -- ++(0,-0.3) -| (cy.north);
+  \draw[arr] (proc.south)              -- (ch.north);
+  \draw[arr] (proc.south) -- ++(0,-0.3) -| (pr.north);
+  % Relationships
+  \draw[lnk] (cy.east) -- node[above, font=\small\bfseries\color{NOrange}]
+      {JOIN on (iso3, year)} (ch.west);
+  \node[font=\small\itshape\color{NBrown!60}] at (11.5,-4.75) {standalone (no join)};
+  \node[rounded corners=3pt, draw=NBrown!50, fill=NYellow!10,
+        minimum height=0.65cm, minimum width=3cm, align=center] (cm)
+        at (2.5,-5.5) {\textbf{country\_meta}\newline {\small iso3, entity, continent}};
+  \draw[dlnk] (cm.north) -- node[right, font=\small\itshape] {iso3} (cy.south);
+  % Design note
+  \node[rounded corners=3pt, draw=NYellow!70!orange, fill=NYellow!10,
+        text width=9cm, align=center, font=\normalsize] at (9.5,-5.5)
+    {\textbf{Key:} Obesity is sourced exclusively from \texttt{country\_health}
+     (WHO, 95\% CIs). Diet-vs-obesity analysis joins on \texttt{(iso3, year)}.};
+\end{tikzpicture}
+\end{frame}
+
+% ═══════════ SLIDE 6 — PLANNED VISUALIZATIONS ══════════════
 \begin{frame}
 \begin{center}
   {\large\bfseries\textcolor{NDarkGreen}{Planned Visualizations}}
