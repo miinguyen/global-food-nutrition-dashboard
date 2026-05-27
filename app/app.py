@@ -91,6 +91,10 @@ app_ui = ui.page_navbar(
         "🌍 What Does the World Eat?",
         ui.layout_sidebar(
             ui.sidebar(
+                ui.div(
+                    ui.h5("🎛️ Filters", class_="mb-1"),
+                    ui.p("Adjust year and region to explore global dietary patterns.", class_="text-muted small mb-3"),
+                ),
                 ui.input_slider(
                     "year_select",
                     "Select Year",
@@ -99,6 +103,7 @@ app_ui = ui.page_navbar(
                     value=2020,
                     step=1,
                     sep="",
+                    animate=ui.AnimationOptions(interval=400, loop=False),
                 ),
                 ui.input_select(
                     "continent_select",
@@ -106,47 +111,69 @@ app_ui = ui.page_navbar(
                     choices=continents_list,
                     selected="All",
                 ),
+                ui.hr(),
+                ui.div(
+                    ui.h5("🔍 Country Deep Dive", class_="mb-1"),
+                    ui.p("Select a country to see its historical trend and dietary breakdown below.", class_="text-muted small mb-2"),
+                ),
                 ui.input_select(
                     "country_select",
                     "Select Country for Detail",
                     choices=countries_list,
                     selected="United States",
                 ),
-                width=280,
+                width=300,
+            ),
+            # Tab intro banner
+            ui.div(
+                ui.h4("🌍 Global Calorie Supply Overview", class_="mb-1 fw-bold"),
+                ui.p("Explore how daily per-capita calorie supply varies across 180+ countries from 1961 to 2023. "
+                     "Use the year slider to animate trends over time, or drill into a specific country for its dietary composition breakdown.",
+                     class_="text-muted mb-0 small"),
+                class_="tab-intro-banner mb-3 p-3"
             ),
             # KPIs Row
             ui.layout_columns(
                 ui.card(
                     ui.div(
-                        ui.div("Average Daily Calories", class_="kpi-title"),
+                        ui.div("🔥 Average Daily Calories", class_="kpi-title"),
                         ui.output_ui("kpi_calories", class_="kpi-value"),
+                        ui.output_ui("kpi_calories_subtitle", class_="kpi-subtitle"),
                     ),
-                    class_="kpi-card"
+                    class_="kpi-card kpi-card-calories"
                 ),
                 ui.card(
                     ui.div(
-                        ui.div("Primary Caloric Source", class_="kpi-title"),
+                        ui.div("🌾 Primary Caloric Source", class_="kpi-title"),
                         ui.output_ui("kpi_source", class_="kpi-value"),
                     ),
-                    class_="kpi-card"
+                    class_="kpi-card kpi-card-source"
                 ),
                 ui.card(
                     ui.div(
-                        ui.div("Selected Country Intake", class_="kpi-title"),
+                        ui.div("📍 Selected Country Intake", class_="kpi-title"),
                         ui.output_ui("kpi_country_intake", class_="kpi-value"),
+                        ui.output_ui("kpi_country_vs_global", class_="kpi-subtitle"),
                     ),
-                    class_="kpi-card"
+                    class_="kpi-card kpi-card-country"
                 ),
-                col_widths=[4, 4, 4],
+                ui.card(
+                    ui.div(
+                        ui.div("🌐 Countries Tracked", class_="kpi-title"),
+                        ui.output_ui("kpi_countries_count", class_="kpi-value"),
+                    ),
+                    class_="kpi-card kpi-card-count"
+                ),
+                col_widths=[3, 3, 3, 3],
             ),
             # Main maps & rank rows
             ui.layout_columns(
                 ui.card(
-                    ui.card_header("Global Calorie Supply Choropleth"),
+                    ui.card_header("🗺️ Global Calorie Supply Choropleth"),
                     output_widget("chart_choropleth"),
                 ),
                 ui.card(
-                    ui.card_header("Top 10 Caloric Supply Countries"),
+                    ui.card_header("🏆 Top 10 Caloric Supply Countries"),
                     output_widget("chart_ranking_bar"),
                 ),
                 col_widths=[7, 5],
@@ -154,11 +181,11 @@ app_ui = ui.page_navbar(
             # Detail trends row
             ui.layout_columns(
                 ui.card(
-                    ui.card_header("Daily Calorie Intake Trend (VS. Global Avg)"),
+                    ui.card_header("📈 Daily Calorie Intake Trend (VS. Global Avg & WHO Guideline)"),
                     output_widget("chart_calorie_trend"),
                 ),
                 ui.card(
-                    ui.card_header("Dietary Composition Over Time (Stacked Area)"),
+                    ui.card_header("📊 Dietary Composition Over Time (Stacked Area)"),
                     output_widget("chart_stacked_area"),
                 ),
                 col_widths=[6, 6],
@@ -439,6 +466,23 @@ def server(input, output, session):
 
     @output
     @render.ui
+    def kpi_calories_subtitle():
+        """Shows how average compares to WHO recommended 2,000-2,500 kcal range."""
+        df = get_cy_year()
+        if df.empty:
+            return ""
+        avg_cal = df["calories"].mean()
+        who_mid = 2250  # midpoint of WHO 2000-2500 range
+        diff_pct = ((avg_cal - who_mid) / who_mid) * 100
+        if diff_pct > 5:
+            return ui.span(f"▲ {diff_pct:+.1f}% above WHO guideline", class_="text-danger")
+        elif diff_pct < -5:
+            return ui.span(f"▼ {diff_pct:+.1f}% below WHO guideline", class_="text-warning")
+        else:
+            return ui.span(f"≈ Within WHO guideline range", class_="text-success")
+
+    @output
+    @render.ui
     def kpi_source():
         df = get_cy_year()
         if df.empty:
@@ -470,6 +514,33 @@ def server(input, output, session):
         val = df["calories"].values[0]
         return f"{val:,.0f} kcal/day"
 
+    @output
+    @render.ui
+    def kpi_country_vs_global():
+        """Shows selected country vs global average comparison."""
+        country = input.country_select()
+        year = input.year_select()
+        df_c = cy[(cy["entity"] == country) & (cy["year"] == year)]
+        df_all = get_cy_year()
+        if df_c.empty or df_all.empty:
+            return ""
+        country_val = df_c["calories"].values[0]
+        global_avg = df_all["calories"].mean()
+        diff_pct = ((country_val - global_avg) / global_avg) * 100
+        if diff_pct > 0:
+            return ui.span(f"▲ {diff_pct:+.1f}% vs. regional avg", class_="text-info")
+        else:
+            return ui.span(f"▼ {diff_pct:+.1f}% vs. regional avg", class_="text-warning")
+
+    @output
+    @render.ui
+    def kpi_countries_count():
+        df = get_cy_year()
+        if df.empty:
+            return "0"
+        count = df["entity"].nunique()
+        return f"{count} countries"
+
     # ============================================================
     # TAB 1: Chart Outputs
     # ============================================================
@@ -486,15 +557,34 @@ def server(input, output, session):
             locations="iso3",
             color="calories",
             hover_name="entity",
-            color_continuous_scale="Viridis",
-            labels={"calories": "Kcal/day"},
+            hover_data={"iso3": False, "calories": ":.0f", "continent": True},
+            color_continuous_scale=[
+                [0, "#fff7ec"], [0.2, "#fee8c8"], [0.4, "#fdbb84"],
+                [0.6, "#fc8d59"], [0.8, "#e34a33"], [1.0, "#b30000"]
+            ],
+            range_color=[1500, 3800],
+            labels={"calories": "Kcal/day", "continent": "Continent"},
             title=f"Global Daily Calorie Supply per Capita ({input.year_select()})"
         )
         fig.update_layout(
             margin={"r":0,"t":40,"l":0,"b":0},
             paper_bgcolor='rgba(0,0,0,0)',
             plot_bgcolor='rgba(0,0,0,0)',
-            geo=dict(showframe=False, showcoastlines=True, projection_type='equirectangular')
+            geo=dict(
+                showframe=False, 
+                showcoastlines=True, 
+                coastlinecolor='#cbd5e1',
+                projection_type='natural earth',
+                bgcolor='rgba(0,0,0,0)',
+                landcolor='#f1f5f9',
+                showocean=True,
+                oceancolor='#e8f4f8',
+            ),
+            coloraxis_colorbar=dict(
+                title="Kcal/day",
+                thickness=15,
+                len=0.6,
+            ),
         )
         return fig
 
@@ -505,24 +595,34 @@ def server(input, output, session):
         if df.empty:
             return go.Figure()
         
-        top10 = df.nlargest(10, "calories")
+        top10 = df.nlargest(10, "calories").sort_values("calories", ascending=True)
         
-        fig = px.bar(
-            top10,
-            x="calories",
-            y="entity",
+        # Gradient colors from warm to hot
+        n = len(top10)
+        colors = [f"rgba({180 + int(75 * i/max(n-1,1))}, {100 - int(60 * i/max(n-1,1))}, {50}, 0.85)" for i in range(n)]
+        
+        fig = go.Figure(go.Bar(
+            x=top10["calories"],
+            y=top10["entity"],
             orientation="h",
-            color="calories",
-            color_continuous_scale="Plasma",
-            labels={"calories": "Kcal/day", "entity": "Country"},
-            title=f"Top 10 Countries by Calorie Supply ({input.year_select()})"
-        )
+            marker=dict(
+                color=colors,
+                line=dict(color="rgba(0,0,0,0.1)", width=1),
+            ),
+            text=[f"{v:,.0f}" for v in top10["calories"]],
+            textposition="outside",
+            textfont=dict(size=11, color="#475569", family="Poppins"),
+            hovertemplate="<b>%{y}</b><br>%{x:,.0f} kcal/day<extra></extra>",
+        ))
+        
         fig.update_layout(
-            margin={"r":10,"t":40,"l":10,"b":10},
+            title=f"Top 10 Countries by Calorie Supply ({input.year_select()})",
+            xaxis_title="Kcal/day",
+            margin={"r":60,"t":40,"l":10,"b":10},
             paper_bgcolor='rgba(0,0,0,0)',
             plot_bgcolor='rgba(0,0,0,0)',
-            coloraxis_showscale=False,
-            yaxis={'categoryorder':'total ascending'}
+            xaxis=dict(showgrid=True, gridcolor="#f1f5f9", zeroline=False),
+            yaxis=dict(showgrid=False),
         )
         return fig
 
@@ -535,17 +635,23 @@ def server(input, output, session):
         
         # Calculate global average per year
         global_avg = cy.groupby("year")["calories"].mean().reset_index()
+        years_range = global_avg["year"].tolist()
         
         fig = go.Figure()
-        # Selected Country
+        
+        # WHO recommended band (2000-2500 kcal/day)
         fig.add_trace(go.Scatter(
-            x=df_country["year"],
-            y=df_country["calories"],
-            mode="lines+markers",
-            name=input.country_select(),
-            line=dict(color="#FF6B35", width=3)
+            x=years_range + years_range[::-1],
+            y=[2500]*len(years_range) + [2000]*len(years_range),
+            fill="toself",
+            fillcolor="rgba(16, 185, 129, 0.08)",
+            line=dict(color="rgba(0,0,0,0)"),
+            name="WHO Guideline (2,000–2,500)",
+            hoverinfo="skip",
+            showlegend=True,
         ))
-        # Global Avg
+        
+        # Global Avg (behind country line)
         fig.add_trace(go.Scatter(
             x=global_avg["year"],
             y=global_avg["calories"],
@@ -553,6 +659,17 @@ def server(input, output, session):
             name="Global Average",
             line=dict(color="#94a3b8", width=2, dash="dash")
         ))
+        
+        # Selected Country (on top)
+        fig.add_trace(go.Scatter(
+            x=df_country["year"],
+            y=df_country["calories"],
+            mode="lines+markers",
+            name=input.country_select(),
+            line=dict(color="#FF6B35", width=3),
+            marker=dict(size=4),
+        ))
+        
         fig.update_layout(
             title=f"Caloric Intake Trend: {input.country_select()} VS Global Avg",
             xaxis_title="Year",
@@ -560,7 +677,9 @@ def server(input, output, session):
             margin={"r":10,"t":40,"l":10,"b":10},
             paper_bgcolor='rgba(0,0,0,0)',
             plot_bgcolor='rgba(0,0,0,0)',
-            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+            xaxis=dict(showgrid=False),
+            yaxis=dict(showgrid=True, gridcolor="#f1f5f9", zeroline=False),
         )
         return fig
 
@@ -585,25 +704,45 @@ def server(input, output, session):
             "grp_other": "Other"
         }
         
-        fig = px.area(
-            df_country,
-            x="year",
-            y=groups,
-            labels=labels_map,
-            title=f"Dietary Calorie Composition in {input.country_select()}"
-        )
+        # Curated food-themed color palette
+        food_colors = {
+            "grp_cereals": "#f59e0b",             # Amber / wheat
+            "grp_meat": "#ef4444",                # Red / meat
+            "grp_dairy_eggs": "#60a5fa",           # Light blue / milk
+            "grp_oils_fats": "#fbbf24",            # Gold / oil
+            "grp_sugar_sweeteners": "#f472b6",     # Pink / candy
+            "grp_fruits_vegetables": "#34d399",    # Green / vegetables
+            "grp_starchy_roots_pulses": "#a78bfa", # Purple / potato
+            "grp_other": "#94a3b8",               # Slate / other
+        }
         
-        # Standardize legends
-        for trace in fig.data:
-            trace.name = labels_map.get(trace.name, trace.name)
+        fig = go.Figure()
+        for g in groups:
+            fig.add_trace(go.Scatter(
+                x=df_country["year"],
+                y=df_country[g],
+                name=labels_map[g],
+                stackgroup="one",
+                mode="lines",
+                line=dict(width=0.5, color=food_colors[g]),
+                fillcolor=food_colors[g],
+                hovertemplate=f"{labels_map[g]}: " + "%{y:,.0f} kcal<extra></extra>",
+            ))
             
         fig.update_layout(
+            title=f"Dietary Calorie Composition in {input.country_select()}",
             xaxis_title="Year",
             yaxis_title="Kcal/day",
             margin={"r":10,"t":40,"l":10,"b":10},
             paper_bgcolor='rgba(0,0,0,0)',
             plot_bgcolor='rgba(0,0,0,0)',
-            legend=dict(orientation="h", yanchor="bottom", y=-0.3, xanchor="center", x=0.5)
+            xaxis=dict(showgrid=False),
+            yaxis=dict(showgrid=True, gridcolor="#f1f5f9", zeroline=False),
+            legend=dict(
+                orientation="h", yanchor="bottom", y=-0.25, xanchor="center", x=0.5,
+                font=dict(size=10),
+            ),
+            hovermode="x unified",
         )
         return fig
 
