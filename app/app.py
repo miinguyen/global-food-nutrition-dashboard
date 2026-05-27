@@ -103,7 +103,7 @@ app_ui = ui.page_navbar(
                     value=2020,
                     step=1,
                     sep="",
-                    animate=ui.AnimationOptions(interval=400, loop=False),
+                    animate=ui.AnimationOptions(interval=150, loop=True),
                 ),
                 ui.input_select(
                     "continent_select",
@@ -585,6 +585,8 @@ def server(input, output, session):
                 thickness=15,
                 len=0.6,
             ),
+            transition_duration=300,
+            uirevision="choropleth",
         )
         return fig
 
@@ -623,6 +625,8 @@ def server(input, output, session):
             plot_bgcolor='rgba(0,0,0,0)',
             xaxis=dict(showgrid=True, gridcolor="#f1f5f9", zeroline=False),
             yaxis=dict(showgrid=False),
+            transition_duration=300,
+            uirevision="ranking",
         )
         return fig
 
