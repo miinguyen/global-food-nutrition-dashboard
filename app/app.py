@@ -103,7 +103,7 @@ app_ui = ui.page_navbar(
                     value=2020,
                     step=1,
                     sep="",
-                    animate=ui.AnimationOptions(interval=150, loop=True),
+                    animate=ui.AnimationOptions(interval=200, loop=False),
                 ),
                 ui.input_select(
                     "continent_select",
@@ -559,8 +559,13 @@ def server(input, output, session):
             hover_name="entity",
             hover_data={"iso3": False, "calories": ":.0f", "continent": True},
             color_continuous_scale=[
-                [0, "#fff7ec"], [0.2, "#fee8c8"], [0.4, "#fdbb84"],
-                [0.6, "#fc8d59"], [0.8, "#e34a33"], [1.0, "#b30000"]
+                [0, "#f7f7e8"],    # Pale cream — low supply
+                [0.15, "#d4e6b5"], # Soft sage green — modest diets
+                [0.35, "#a2c97d"], # Fresh green — moderate
+                [0.5, "#e8c94a"],  # Golden wheat — balanced
+                [0.7, "#e09530"],  # Warm amber — high supply
+                [0.85, "#c46618"], # Rich harvest orange
+                [1.0, "#7a3b10"]   # Deep brown — caloric abundance
             ],
             range_color=[1500, 3800],
             labels={"calories": "Kcal/day", "continent": "Continent"},
@@ -599,9 +604,17 @@ def server(input, output, session):
         
         top10 = df.nlargest(10, "calories").sort_values("calories", ascending=True)
         
-        # Gradient colors from warm to hot
-        n = len(top10)
-        colors = [f"rgba({180 + int(75 * i/max(n-1,1))}, {100 - int(60 * i/max(n-1,1))}, {50}, 0.85)" for i in range(n)]
+        # Use same harvest color palette as the choropleth map
+        # Map calorie values to the green→gold→amber→brown scale
+        harvest_palette = ["#d4e6b5", "#a2c97d", "#e8c94a", "#e09530", "#c46618", "#7a3b10"]
+        cal_min, cal_max = 1500, 3800
+        
+        def cal_to_color(val):
+            t = max(0, min(1, (val - cal_min) / (cal_max - cal_min)))
+            idx = min(int(t * (len(harvest_palette) - 1)), len(harvest_palette) - 2)
+            return harvest_palette[idx + 1] if t > 0.5 else harvest_palette[idx]
+        
+        colors = [cal_to_color(v) for v in top10["calories"]]
         
         fig = go.Figure(go.Bar(
             x=top10["calories"],
@@ -609,7 +622,7 @@ def server(input, output, session):
             orientation="h",
             marker=dict(
                 color=colors,
-                line=dict(color="rgba(0,0,0,0.1)", width=1),
+                line=dict(color="rgba(0,0,0,0.08)", width=1),
             ),
             text=[f"{v:,.0f}" for v in top10["calories"]],
             textposition="outside",
