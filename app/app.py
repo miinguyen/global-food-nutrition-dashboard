@@ -44,7 +44,7 @@ cy = cy[cy['year'] >= 1961].copy()
 ch = ch[ch['year'] >= 1975].copy()
 
 # Sort lookups for selectors
-countries_list = sorted(cy["entity"].unique().tolist())
+countries_list = ["Global Average"] + sorted(cy["entity"].unique().tolist())
 continents_list = ["All"] + sorted([c for c in cy["continent"].dropna().unique() if c != "Other"])
 categories_list = ["All"] + sorted([cat for cat in products["top_category"].dropna().unique() if cat != "Unknown"])[:30] # Top 30 categories
 
@@ -88,11 +88,11 @@ def map_category_to_macro(category_name):
 app_ui = ui.page_navbar(
     # --- Section 1: Country-Level ---
     ui.nav_panel(
-        "🌍 What Does the World Eat?",
+        "What Does the World Eat?",
         ui.layout_sidebar(
             ui.sidebar(
                 ui.div(
-                    ui.h5("🎛️ Filters", class_="mb-1"),
+                    ui.h5("Filters", class_="mb-1"),
                     ui.p("Adjust year and region to explore global dietary patterns.", class_="text-muted small mb-3"),
                 ),
                 ui.input_slider(
@@ -113,20 +113,20 @@ app_ui = ui.page_navbar(
                 ),
                 ui.hr(),
                 ui.div(
-                    ui.h5("🔍 Country Deep Dive", class_="mb-1"),
+                    ui.h5("Country Deep Dive", class_="mb-1"),
                     ui.p("Select a country to see its historical trend and dietary breakdown below.", class_="text-muted small mb-2"),
                 ),
                 ui.input_select(
                     "country_select",
                     "Select Country for Detail",
                     choices=countries_list,
-                    selected="United States",
+                    selected="Global Average",
                 ),
                 width=300,
             ),
             # Tab intro banner
             ui.div(
-                ui.h4("🌍 Global Calorie Supply Overview", class_="mb-1 fw-bold"),
+                ui.h4("Global Calorie Supply Overview", class_="mb-1 fw-bold"),
                 ui.p("Explore how daily per-capita calorie supply varies across 180+ countries from 1961 to 2023. "
                      "Use the year slider to animate trends over time, or drill into a specific country for its dietary composition breakdown.",
                      class_="text-muted mb-0 small"),
@@ -136,7 +136,7 @@ app_ui = ui.page_navbar(
             ui.layout_columns(
                 ui.card(
                     ui.div(
-                        ui.div("🔥 Average Daily Calories", class_="kpi-title"),
+                        ui.div("Average Daily Calories", class_="kpi-title"),
                         ui.output_ui("kpi_calories", class_="kpi-value"),
                         ui.output_ui("kpi_calories_subtitle", class_="kpi-subtitle"),
                     ),
@@ -144,14 +144,14 @@ app_ui = ui.page_navbar(
                 ),
                 ui.card(
                     ui.div(
-                        ui.div("🌾 Primary Caloric Source", class_="kpi-title"),
+                        ui.div("Primary Caloric Source", class_="kpi-title"),
                         ui.output_ui("kpi_source", class_="kpi-value"),
                     ),
                     class_="kpi-card kpi-card-source"
                 ),
                 ui.card(
                     ui.div(
-                        ui.div("📍 Selected Country Intake", class_="kpi-title"),
+                        ui.div("Selected Country Intake", class_="kpi-title"),
                         ui.output_ui("kpi_country_intake", class_="kpi-value"),
                         ui.output_ui("kpi_country_vs_global", class_="kpi-subtitle"),
                     ),
@@ -159,7 +159,7 @@ app_ui = ui.page_navbar(
                 ),
                 ui.card(
                     ui.div(
-                        ui.div("🌐 Countries Tracked", class_="kpi-title"),
+                        ui.div("Countries Tracked", class_="kpi-title"),
                         ui.output_ui("kpi_countries_count", class_="kpi-value"),
                     ),
                     class_="kpi-card kpi-card-count"
@@ -169,11 +169,11 @@ app_ui = ui.page_navbar(
             # Main maps & rank rows
             ui.layout_columns(
                 ui.card(
-                    ui.card_header("🗺️ Global Calorie Supply Choropleth"),
+                    ui.card_header("Global Calorie Supply Choropleth"),
                     output_widget("chart_choropleth"),
                 ),
                 ui.card(
-                    ui.card_header("🏆 Top 10 Caloric Supply Countries"),
+                    ui.card_header("Top 10 Caloric Supply Countries"),
                     output_widget("chart_ranking_bar"),
                 ),
                 col_widths=[7, 5],
@@ -181,11 +181,11 @@ app_ui = ui.page_navbar(
             # Detail trends row
             ui.layout_columns(
                 ui.card(
-                    ui.card_header("📈 Daily Calorie Intake Trend (VS. Global Avg & WHO Guideline)"),
+                    ui.card_header("Daily Calorie Intake Trend (VS. Global Avg & WHO Guideline)"),
                     output_widget("chart_calorie_trend"),
                 ),
                 ui.card(
-                    ui.card_header("📊 Dietary Composition Over Time (Stacked Area)"),
+                    ui.card_header("Dietary Composition Over Time (Stacked Area)"),
                     output_widget("chart_stacked_area"),
                 ),
                 col_widths=[6, 6],
@@ -195,7 +195,7 @@ app_ui = ui.page_navbar(
     
     # --- Section 2: Diet vs. Health Outcomes ---
     ui.nav_panel(
-        "🥗 How Healthy Is It?",
+        "How Healthy Is It?",
         ui.layout_sidebar(
             ui.sidebar(
                 ui.input_select(
@@ -254,7 +254,7 @@ app_ui = ui.page_navbar(
     
     # --- Section 3: Product-Level Analysis ---
     ui.nav_panel(
-        "🔬 What's In Our Food?",
+        "What's In Our Food?",
         ui.layout_sidebar(
             ui.sidebar(
                 ui.input_select(
@@ -293,7 +293,7 @@ app_ui = ui.page_navbar(
             ),
             # ML Real-time form
             ui.card(
-                ui.card_header("🤖 Interactive Nutri-Score Predictor (Machine Learning Classifier)"),
+                ui.card_header("Interactive Nutri-Score Predictor (Machine Learning Classifier)"),
                 ui.layout_columns(
                     ui.div(
                         ui.p("Enter the macronutrient content per 100g below to predict the Nutri-Score Grade (A–E) in real time:"),
@@ -326,7 +326,7 @@ app_ui = ui.page_navbar(
 
     # --- Section 4: My Personal Diet Simulator (Synthesis) ---
     ui.nav_panel(
-        "🥗 My Diet Simulator",
+        "My Diet Simulator",
         ui.layout_sidebar(
             ui.sidebar(
                 ui.input_select(
@@ -401,7 +401,7 @@ app_ui = ui.page_navbar(
             ),
             # AI Forecast Card
             ui.card(
-                ui.card_header("🤖 AI Health Risk Forecast & Recommendations"),
+                ui.card_header("AI Health Risk Forecast & Recommendations"),
                 ui.output_ui("sim_ai_forecast"),
             ),
         ),
@@ -438,6 +438,16 @@ def server(input, output, session):
     def get_cy_country():
         """Get historical data for the selected country."""
         country = input.country_select()
+        if country == "Global Average":
+            # Compute global average per year across all countries
+            groups = ["grp_cereals", "grp_meat", "grp_dairy_eggs", "grp_oils_fats", 
+                      "grp_sugar_sweeteners", "grp_fruits_vegetables", "grp_starchy_roots_pulses", "grp_other"]
+            agg_cols = {"calories": "mean"}
+            for g in groups:
+                agg_cols[g] = "mean"
+            df_global = cy.groupby("year").agg(agg_cols).reset_index()
+            df_global["entity"] = "Global Average"
+            return df_global
         return cy[cy["entity"] == country].copy()
 
     @reactive.calc
@@ -490,14 +500,14 @@ def server(input, output, session):
         groups = ["grp_cereals", "grp_meat", "grp_dairy_eggs", "grp_oils_fats", 
                   "grp_sugar_sweeteners", "grp_fruits_vegetables", "grp_starchy_roots_pulses", "grp_other"]
         group_labels = {
-            "grp_cereals": "Cereals 🌾",
-            "grp_meat": "Meat 🥩",
-            "grp_dairy_eggs": "Dairy & Eggs 🥛",
-            "grp_oils_fats": "Oils & Fats 🧈",
-            "grp_sugar_sweeteners": "Sugars & Sweeteners 🍬",
-            "grp_fruits_vegetables": "Fruits & Vegetables 🍎",
-            "grp_starchy_roots_pulses": "Starchy Roots & Pulses 🥔",
-            "grp_other": "Other 🍽️"
+            "grp_cereals": "Cereals",
+            "grp_meat": "Meat",
+            "grp_dairy_eggs": "Dairy & Eggs",
+            "grp_oils_fats": "Oils & Fats",
+            "grp_sugar_sweeteners": "Sugars & Sweeteners",
+            "grp_fruits_vegetables": "Fruits & Vegetables",
+            "grp_starchy_roots_pulses": "Starchy Roots & Pulses",
+            "grp_other": "Other"
         }
         avg_shares = df[groups].mean()
         top_group = avg_shares.idxmax()
@@ -508,10 +518,16 @@ def server(input, output, session):
     def kpi_country_intake():
         country = input.country_select()
         year = input.year_select()
-        df = cy[(cy["entity"] == country) & (cy["year"] == year)]
-        if df.empty:
-            return "N/A"
-        val = df["calories"].values[0]
+        if country == "Global Average":
+            df = cy[cy["year"] == year]
+            if df.empty:
+                return "N/A"
+            val = df["calories"].mean()
+        else:
+            df = cy[(cy["entity"] == country) & (cy["year"] == year)]
+            if df.empty:
+                return "N/A"
+            val = df["calories"].values[0]
         return f"{val:,.0f} kcal/day"
 
     @output
@@ -604,17 +620,21 @@ def server(input, output, session):
         
         top10 = df.nlargest(10, "calories").sort_values("calories", ascending=True)
         
-        # Use same harvest color palette as the choropleth map
-        # Map calorie values to the green→gold→amber→brown scale
-        harvest_palette = ["#d4e6b5", "#a2c97d", "#e8c94a", "#e09530", "#c46618", "#7a3b10"]
-        cal_min, cal_max = 1500, 3800
-        
-        def cal_to_color(val):
-            t = max(0, min(1, (val - cal_min) / (cal_max - cal_min)))
-            idx = min(int(t * (len(harvest_palette) - 1)), len(harvest_palette) - 2)
-            return harvest_palette[idx + 1] if t > 0.5 else harvest_palette[idx]
-        
-        colors = [cal_to_color(v) for v in top10["calories"]]
+        # Harvest palette spread by rank (bottom=lightest → top=darkest)
+        # 10 distinct colors from sage green to deep brown
+        rank_colors = [
+            "#d4e6b5",  # 10th — soft sage
+            "#b8d98e",  # 9th  — light green
+            "#a2c97d",  # 8th  — fresh green
+            "#c9bf3a",  # 7th  — olive gold
+            "#e8c94a",  # 6th  — golden wheat
+            "#e0a830",  # 5th  — warm gold
+            "#e09530",  # 4th  — amber
+            "#d07820",  # 3rd  — deep amber
+            "#c46618",  # 2nd  — harvest orange
+            "#7a3b10",  # 1st  — deep brown
+        ]
+        colors = rank_colors[:len(top10)]
         
         fig = go.Figure(go.Bar(
             x=top10["calories"],
@@ -1392,7 +1412,7 @@ def server(input, output, session):
         
         if not diet:
             return ui.div(
-                ui.p("🛡️ Load representative foods in the simulator to run your AI health outcome forecast.", class_="text-center py-4 fs-5 text-muted")
+                ui.p("Load representative foods in the simulator to run your AI health outcome forecast.", class_="text-center py-4 fs-5 text-muted")
             )
             
         # Fetch country 2020 baseline composition
@@ -1480,27 +1500,27 @@ def server(input, output, session):
         # 1. Calorie Assessment
         cal_diff = sim_total_kcal - target_calories
         if cal_diff > 300:
-            recs.append(f"⚠️ **Caloric Excess:** Your intake of **{sim_total_kcal:,.0f} kcal** exceeds your active daily target of **{target_calories:,.0f} kcal** by **{cal_diff:,.0f} kcal**. This intake profile is strongly associated with an increased long-term obesity prevalence.")
+            recs.append(f"**Caloric Excess:** Your intake of **{sim_total_kcal:,.0f} kcal** exceeds your active daily target of **{target_calories:,.0f} kcal** by **{cal_diff:,.0f} kcal**. This intake profile is strongly associated with an increased long-term obesity prevalence.")
             alert_class = "alert-danger"
         elif cal_diff < -300:
-            recs.append(f"🍏 **Caloric Deficit:** Your simulated intake (**{sim_total_kcal:,.0f} kcal**) is significantly below your active physical requirement (**{target_calories:,.0f} kcal**). Ensure you are eating highly nutrient-dense foods to prevent nutritional deficiency.")
+            recs.append(f"**Caloric Deficit:** Your simulated intake (**{sim_total_kcal:,.0f} kcal**) is significantly below your active physical requirement (**{target_calories:,.0f} kcal**). Ensure you are eating highly nutrient-dense foods to prevent nutritional deficiency.")
             alert_class = "alert-warning"
         else:
-            recs.append(f"🌟 **Optimal Calorie Balance:** Your simulated daily intake (**{sim_total_kcal:,.0f} kcal**) aligns perfectly with your physical activity level guideline (**{target_calories:,.0f} kcal**).")
+            recs.append(f"**Optimal Calorie Balance:** Your simulated daily intake (**{sim_total_kcal:,.0f} kcal**) aligns perfectly with your physical activity level guideline (**{target_calories:,.0f} kcal**).")
             
         # 2. Composition / Processing Assessment
         if nova_pct >= 40:
-            recs.append(f"🏭 **High Ultra-Processing (NOVA 4):** **{nova_pct:.1f}%** of your daily diet contains ultra-processed products. The World Health Organization links diets exceeding 30% ultra-processed shares to chronic inflammation and metabolic syndrome.")
+            recs.append(f"**High Ultra-Processing (NOVA 4):** **{nova_pct:.1f}%** of your daily diet contains ultra-processed products. The World Health Organization links diets exceeding 30% ultra-processed shares to chronic inflammation and metabolic syndrome.")
             alert_class = "alert-danger"
         elif avg_ns <= 2.2 and nova_pct < 20:
-            recs.append(f"🥗 **Clean, Nutrient-Dense Diet:** Excellent product quality! Your average Nutri-Score is outstanding (**A/B**), and your ultra-processed intake share is very low (**{nova_pct:.1f}%**).")
+            recs.append(f"**Clean, Nutrient-Dense Diet:** Excellent product quality! Your average Nutri-Score is outstanding (**A/B**), and your ultra-processed intake share is very low (**{nova_pct:.1f}%**).")
             
         # 3. Model shift assessment
         if diff > 1.5:
-            recs.append(f"📈 **ML Health Risk Shift:** Compared to the average **{country}** baseline lifestyle, this diet shifts your predicted long-term metabolic health risk by **+{diff:.1f}%** on the country obesity scale. Minimizing refined sugars, trans fats, and increasing complex carbohydrates (cereals, legumes) is recommended.")
+            recs.append(f"**ML Health Risk Shift:** Compared to the average **{country}** baseline lifestyle, this diet shifts your predicted long-term metabolic health risk by **+{diff:.1f}%** on the country obesity scale. Minimizing refined sugars, trans fats, and increasing complex carbohydrates (cereals, legumes) is recommended.")
             alert_class = "alert-danger"
         elif diff < -1.5:
-            recs.append(f"📉 **ML Health Risk Shift:** Fantastic! This dietary structure shifts your predicted metabolic health risk by **{diff:.1f}%** compared to the average **{country}** baseline. This composition offers substantial protective health benefits.")
+            recs.append(f"**ML Health Risk Shift:** Fantastic! This dietary structure shifts your predicted metabolic health risk by **{diff:.1f}%** compared to the average **{country}** baseline. This composition offers substantial protective health benefits.")
             
         # Renders the final forecast panel
         return ui.div(
@@ -1524,7 +1544,7 @@ def server(input, output, session):
                 class_="p-3 bg-light border rounded mb-3"
             ),
             ui.div(
-                ui.h5("📋 AI Recommendations & Dietary Analysis:", class_="fw-bold"),
+                ui.h5("AI Recommendations & Dietary Analysis:", class_="fw-bold"),
                 ui.markdown("\n\n".join(recs)),
                 class_=f"alert {alert_class} mt-2"
             )
