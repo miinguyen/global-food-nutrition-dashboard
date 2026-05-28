@@ -7,7 +7,7 @@ linked visual components, and real-time machine learning predictions.
 """
 
 from shiny import App, ui, render, reactive
-from shinywidgets import output_widget, render_widget
+from shinywidgets import output_widget, render_widget, reactive_read
 import plotly.express as px
 import plotly.graph_objects as go
 import pandas as pd
@@ -557,16 +557,15 @@ def server(input, output, session):
         count = df["entity"].nunique()
         return f"{count} countries"
 
-    # ============================================================
-    # TAB 1: Chart Outputs
-    # ============================================================
+    # Reactive value to store clicked country from choropleth
+    map_clicked_country = reactive.value("")
 
     @output
     @render_widget
     def chart_choropleth():
         df = get_cy_year()
         if df.empty:
-            return go.Figure()
+            return go.FigureWidget()
         
         fig = px.choropleth(
             df,
@@ -609,7 +608,30 @@ def server(input, output, session):
             transition_duration=300,
             uirevision="choropleth",
         )
-        return fig
+        
+        # Convert to FigureWidget and attach click handler
+        fw = go.FigureWidget(fig)
+        
+        def on_map_click(trace, points, state):
+            if points.point_inds:
+                idx = points.point_inds[0]
+                # Get country name from hovertext (set by hover_name="entity")
+                try:
+                    name = trace.hovertext[idx]
+                    if name and name in countries_list:
+                        map_clicked_country.set(name)
+                except Exception:
+                    pass
+        
+        fw.data[0].on_click(on_map_click)
+        return fw
+
+    # Sync: when a country is clicked on the map, update the selector
+    @reactive.effect
+    def _sync_country_from_map():
+        country = map_clicked_country()
+        if country and country in countries_list:
+            ui.update_select("country_select", selected=country)
 
     @output
     @render_widget
