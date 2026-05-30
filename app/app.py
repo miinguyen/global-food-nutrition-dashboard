@@ -225,14 +225,50 @@ app_ui = ui.page_navbar(
                 ),
                 width=280,
             ),
-            # Scatter Plot and Obesity Map
+            # Tab intro banner
+            ui.div(
+                ui.h4("Diet & Health Outcomes Overview", class_="mb-1 fw-bold"),
+                ui.p("Explore the relationship between dietary calorie supply and health outcomes across countries. "
+                     "Select a health indicator to see how diet correlates with obesity, underweight prevalence, or life expectancy.",
+                     class_="text-muted mb-0 small"),
+                class_="tab-intro-banner mb-3 p-3"
+            ),
+            # KPIs Row
+            ui.layout_columns(
+                ui.card(
+                    ui.div(
+                        ui.div("Avg. Health Metric", class_="kpi-title"),
+                        ui.output_ui("h_kpi_avg_metric", class_="kpi-value"),
+                        ui.output_ui("h_kpi_avg_metric_sub", class_="kpi-subtitle"),
+                    ),
+                    class_="kpi-card kpi-card-calories"
+                ),
+                ui.card(
+                    ui.div(
+                        ui.div("Most At-Risk Country", class_="kpi-title"),
+                        ui.output_ui("h_kpi_worst", class_="kpi-value"),
+                        ui.output_ui("h_kpi_worst_sub", class_="kpi-subtitle"),
+                    ),
+                    class_="kpi-card kpi-card-country"
+                ),
+                ui.card(
+                    ui.div(
+                        ui.div("Best Performing Country", class_="kpi-title"),
+                        ui.output_ui("h_kpi_best", class_="kpi-value"),
+                        ui.output_ui("h_kpi_best_sub", class_="kpi-subtitle"),
+                    ),
+                    class_="kpi-card kpi-card-count"
+                ),
+                col_widths=[4, 4, 4],
+            ),
+            # Linked Scatter + Anomaly Map
             ui.layout_columns(
                 ui.card(
                     ui.card_header("Diet Calorie Supply vs. Health Outcome"),
                     output_widget("chart_health_scatter"),
                 ),
                 ui.card(
-                    ui.card_header("Obesity Prevalence Trend Map"),
+                    ui.card_header("Diet–Health Anomaly Map"),
                     output_widget("chart_obesity_map"),
                 ),
                 col_widths=[6, 6],
@@ -240,11 +276,11 @@ app_ui = ui.page_navbar(
             # Cluster Projection & Obesity Regressor Dashboard
             ui.layout_columns(
                 ui.card(
-                    ui.card_header("Dietary Profiling Clusters (PCA + K-Means)"),
+                    ui.card_header("Dietary Profiling Clusters"),
                     output_widget("chart_diet_clusters"),
                 ),
                 ui.card(
-                    ui.card_header("Obesity Predictor Dashboard (ML actual/predicted + importances)"),
+                    ui.card_header("Obesity Predictor Dashboard"),
                     output_widget("chart_regression_dashboard"),
                 ),
                 col_widths=[6, 6],
@@ -560,6 +596,29 @@ def server(input, output, session):
     # Reactive value to store clicked country from choropleth
     map_clicked_country = reactive.value("")
 
+    # Reactive value for Tab 2 linked highlighting (scatter ↔ map)
+    health_clicked_country = reactive.value("")
+
+    # Sync: when dropdown changes, update the highlight
+    @reactive.effect
+    @reactive.event(input.h_country_select)
+    def _sync_health_from_dropdown():
+        country = input.h_country_select()
+        if country and country != "None":
+            health_clicked_country.set(country)
+        else:
+            health_clicked_country.set("")
+
+    # Sync: when a chart click changes the highlight, update the dropdown
+    @reactive.effect
+    def _sync_dropdown_from_health_click():
+        country = health_clicked_country()
+        current = input.h_country_select()
+        if country and country != current:
+            ui.update_select("h_country_select", selected=country)
+        elif not country and current != "None":
+            ui.update_select("h_country_select", selected="None")
+
     @output
     @render_widget
     def chart_choropleth():
@@ -819,6 +878,27 @@ def server(input, output, session):
     # TAB 2: Diet vs. Health Outcomes
     # ============================================================
 
+    def _residual_color(residual, max_abs, metric):
+        """Map a residual value to a green-red color matching the anomaly map.
+        For obesity/underweight: negative=green (better), positive=red (worse)
+        For life_exp: positive=green (better), negative=red (worse)"""
+        if max_abs == 0:
+            return "#94a3b8"
+        t = residual / max_abs  # range [-1, 1]
+        if metric == "life_exp":
+            t = -t  # flip: positive residual = better for life_exp
+        # t > 0 means worse (red), t < 0 means better (green)
+        t = max(-1, min(1, t))
+        if t >= 0:
+            # Interpolate neutral → red
+            r = int(245 + t * (220 - 245))
+            g = int(245 - t * 245 * 0.7)
+            b = int(245 - t * 245 * 0.8)
+            return f"rgb({r},{g},{b})" if t < 0.15 else f"rgb({int(220*t+60*(1-t))}, {int(38*t+180*(1-t))}, {int(38*t+120*(1-t))})"
+        else:
+            t = -t  # make positive for interpolation
+            return f"rgb({int(22*t+180*(1-t))}, {int(163*t+180*(1-t))}, {int(74*t+120*(1-t))})"
+
     @reactive.calc
     def get_health_data():
         """Get merged dietary and health dataset for Tab 2 year & continent."""
@@ -833,20 +913,116 @@ def server(input, output, session):
             merged = merged[merged["continent_diet"] == continent]
         return merged
 
+    @reactive.calc
+    def get_health_residuals():
+        """Compute OLS residuals: how much each country deviates from the diet-health trend."""
+        df = get_health_data().copy()
+        metric = input.health_metric()
+
+        df = df.dropna(subset=["calories", metric])
+        if len(df) < 3:
+            return pd.DataFrame()
+
+        # OLS linear fit: health_metric = a * calories + b
+        coeffs = np.polyfit(df["calories"].values, df[metric].values, 1)
+        df["predicted"] = np.polyval(coeffs, df["calories"].values)
+        df["residual"] = df[metric].values - df["predicted"]
+
+        return df
+
+    # --- Tab 2 KPI Renders ---
+
+    @output
+    @render.ui
+    def h_kpi_avg_metric():
+        df = get_health_residuals()
+        metric = input.health_metric()
+        metric_units = {"who_obesity_pct": "%", "underweight_pct": "%", "life_exp": "years"}
+        if df.empty:
+            return "N/A"
+        avg = df[metric].mean()
+        return f"{avg:.1f} {metric_units.get(metric, '')}"
+
+    @output
+    @render.ui
+    def h_kpi_avg_metric_sub():
+        metric = input.health_metric()
+        metric_names = {
+            "who_obesity_pct": "Adult obesity rate",
+            "underweight_pct": "Child underweight rate",
+            "life_exp": "Life expectancy"
+        }
+        return ui.span(f"{metric_names.get(metric, '')} across all countries", class_="text-muted")
+
+
+    @output
+    @render.ui
+    def h_kpi_worst():
+        df = get_health_residuals()
+        metric = input.health_metric()
+        if df.empty:
+            return "N/A"
+        # Worst = highest positive residual for obesity/underweight, lowest for life_exp
+        if metric == "life_exp":
+            worst = df.loc[df["residual"].idxmin()]
+        else:
+            worst = df.loc[df["residual"].idxmax()]
+        return worst["entity"]
+
+    @output
+    @render.ui
+    def h_kpi_worst_sub():
+        df = get_health_residuals()
+        metric = input.health_metric()
+        if df.empty:
+            return ""
+        if metric == "life_exp":
+            worst = df.loc[df["residual"].idxmin()]
+        else:
+            worst = df.loc[df["residual"].idxmax()]
+        return ui.span(f"Residual: {worst['residual']:+.1f}", class_="text-danger")
+
+    @output
+    @render.ui
+    def h_kpi_best():
+        df = get_health_residuals()
+        metric = input.health_metric()
+        if df.empty:
+            return "N/A"
+        # Best = lowest residual for obesity/underweight, highest for life_exp
+        if metric == "life_exp":
+            best = df.loc[df["residual"].idxmax()]
+        else:
+            best = df.loc[df["residual"].idxmin()]
+        return best["entity"]
+
+    @output
+    @render.ui
+    def h_kpi_best_sub():
+        df = get_health_residuals()
+        metric = input.health_metric()
+        if df.empty:
+            return ""
+        if metric == "life_exp":
+            best = df.loc[df["residual"].idxmax()]
+        else:
+            best = df.loc[df["residual"].idxmin()]
+        return ui.span(f"Residual: {best['residual']:+.1f}", class_="text-success")
+
     @output
     @render_widget
     def chart_health_scatter():
-        df = get_health_data()
+        df = get_health_residuals()
         if df.empty:
-            return go.Figure()
-        
+            return go.FigureWidget()
+
         metric = input.health_metric()
         metric_labels = {
             "who_obesity_pct": "Obesity Rate (%)",
             "underweight_pct": "Child Underweight (%)",
             "life_exp": "Life Expectancy (Years)"
         }
-        
+
         fig = px.scatter(
             df,
             x="calories",
@@ -857,37 +1033,173 @@ def server(input, output, session):
             labels={"calories": "Daily Calorie Intake (kcal)", metric: metric_labels.get(metric, metric), "continent_diet": "Continent"},
             title=f"Daily Calories VS. {metric_labels.get(metric, metric)} ({input.h_year_select()})"
         )
+
+        # Highlight clicked country with star marker + residual line
+        clicked = health_clicked_country()
+        if clicked and clicked in df["entity"].values:
+            row = df[df["entity"] == clicked].iloc[0]
+            max_abs = max(abs(df["residual"].min()), abs(df["residual"].max()), 1)
+            star_color = _residual_color(row["residual"], max_abs, metric)
+            # Vertical residual line: from predicted (on trendline) to actual value
+            fig.add_trace(go.Scatter(
+                x=[row["calories"], row["calories"]],
+                y=[row["predicted"], row[metric]],
+                mode="lines+markers+text",
+                marker=dict(size=[6, 16], color=["#94a3b8", star_color], symbol=["circle", "star"]),
+                line=dict(color=star_color, width=2, dash="dot"),
+                text=["", clicked],
+                textposition="top center",
+                textfont=dict(size=11, color=star_color, family="Poppins"),
+                name=f"\u2605 {clicked} (residual: {row['residual']:+.1f})",
+                showlegend=True,
+            ))
+
         fig.update_layout(
             margin={"r":10,"t":40,"l":10,"b":10},
             paper_bgcolor='rgba(0,0,0,0)',
-            plot_bgcolor='rgba(0,0,0,0)'
+            plot_bgcolor='rgba(0,0,0,0)',
+            uirevision="health_scatter",
         )
-        return fig
+
+        # Convert to FigureWidget for click interactivity
+        fw = go.FigureWidget(fig)
+
+        def on_scatter_click(trace, points, state):
+            if points.point_inds:
+                idx = points.point_inds[0]
+                try:
+                    name = trace.hovertext[idx] if trace.hovertext is not None else None
+                    if name and isinstance(name, str):
+                        health_clicked_country.set(name)
+                except Exception:
+                    pass
+
+        # Attach click handler to scatter traces (skip trendlines and highlight traces)
+        for trace in fw.data:
+            mode_str = str(getattr(trace, 'mode', '') or '')
+            name_str = str(getattr(trace, 'name', '') or '')
+            if 'markers' in mode_str and '\u2605' not in name_str:
+                try:
+                    trace.on_click(on_scatter_click)
+                except Exception:
+                    pass
+
+        return fw
 
     @output
     @render_widget
     def chart_obesity_map():
-        # Get latest WHO health data for the selected year
-        df = ch[ch["year"] == input.h_year_select()].copy()
+        """Residual/Anomaly Map: shows which countries deviate from the diet-health trend."""
+        df = get_health_residuals()
         if df.empty:
-            return go.Figure()
-        
+            return go.FigureWidget()
+
+        metric = input.health_metric()
+        metric_labels = {
+            "who_obesity_pct": "Obesity Rate",
+            "underweight_pct": "Child Underweight",
+            "life_exp": "Life Expectancy"
+        }
+
+        # Interpret residual direction:
+        # Obesity/Underweight: positive residual = worse than expected → red
+        # Life Expectancy: positive residual = better than expected → green
+        if metric == "life_exp":
+            color_scale = [
+                [0, "#dc2626"],     # Deep red — much worse than expected
+                [0.3, "#fca5a5"],   # Light red
+                [0.5, "#f5f5f5"],   # Neutral
+                [0.7, "#86efac"],   # Light green
+                [1, "#16a34a"]      # Deep green — much better than expected
+            ]
+            bar_title = "Deviation (+ = Better)"
+        else:
+            color_scale = [
+                [0, "#16a34a"],     # Deep green — much better than expected
+                [0.3, "#86efac"],   # Light green
+                [0.5, "#f5f5f5"],   # Neutral
+                [0.7, "#fca5a5"],   # Light red
+                [1, "#dc2626"]      # Deep red — much worse than expected
+            ]
+            bar_title = "Deviation (+ = Worse)"
+
+        max_abs = max(abs(df["residual"].min()), abs(df["residual"].max()), 1)
+
         fig = px.choropleth(
             df,
             locations="iso3",
-            color="who_obesity_pct",
-            hover_name="iso3",
-            color_continuous_scale="Reds",
-            labels={"who_obesity_pct": "Obesity %"},
-            title=f"Adult Obesity Prevalence Map ({input.h_year_select()})"
+            color="residual",
+            hover_name="entity",
+            hover_data={
+                "iso3": False,
+                "residual": ":.1f",
+                "calories": ":.0f",
+                metric: ":.1f",
+                "predicted": ":.1f",
+            },
+            color_continuous_scale=color_scale,
+            range_color=[-max_abs, max_abs],
+            labels={
+                "residual": bar_title,
+                "calories": "Calories (kcal/day)",
+                metric: metric_labels.get(metric, metric),
+                "predicted": "Expected from Trend",
+            },
+            title=f"{metric_labels.get(metric)} Anomaly: Deviation from Diet–Health Trend ({input.h_year_select()})"
         )
+
         fig.update_layout(
-            margin={"r":0,"t":40,"l":0,"b":0},
+            margin={"r": 0, "t": 40, "l": 0, "b": 0},
             paper_bgcolor='rgba(0,0,0,0)',
             plot_bgcolor='rgba(0,0,0,0)',
-            geo=dict(showframe=False, showcoastlines=True, projection_type='equirectangular')
+            geo=dict(
+                showframe=False,
+                showcoastlines=True,
+                coastlinecolor='#cbd5e1',
+                projection_type='natural earth',
+                bgcolor='rgba(0,0,0,0)',
+                landcolor='#f1f5f9',
+                showocean=True,
+                oceancolor='#e8f4f8',
+            ),
+            coloraxis_colorbar=dict(
+                thickness=15,
+                len=0.6,
+            ),
+            uirevision="anomaly_map",
         )
-        return fig
+
+        # Highlight clicked country with a border/annotation
+        clicked = health_clicked_country()
+        if clicked and clicked in df["entity"].values:
+            row = df[df["entity"] == clicked].iloc[0]
+            fig.add_annotation(
+                text=f"\u2605 {clicked}<br>Residual: {row['residual']:+.1f}",
+                showarrow=False,
+                xref="paper", yref="paper",
+                x=0.01, y=0.01,
+                font=dict(size=13, color="#ef4444", family="Poppins"),
+                bgcolor="rgba(255,255,255,0.85)",
+                bordercolor="#ef4444",
+                borderwidth=1,
+                borderpad=6,
+            )
+
+        # Convert to FigureWidget for click interactivity
+        fw = go.FigureWidget(fig)
+
+        def on_map_click(trace, points, state):
+            if points.point_inds:
+                idx = points.point_inds[0]
+                try:
+                    name = trace.hovertext[idx] if trace.hovertext is not None else None
+                    if name and isinstance(name, str):
+                        health_clicked_country.set(name)
+                except Exception:
+                    pass
+
+        fw.data[0].on_click(on_map_click)
+        return fw
 
     @output
     @render_widget
@@ -896,8 +1208,24 @@ def server(input, output, session):
         year = input.h_year_select()
         cy_y = cy[cy["year"] == year].copy()
         
+        # Respect continent filter from sidebar
+        continent = input.h_continent_select()
+        if continent != "All":
+            cy_y = cy_y[cy_y["continent"] == continent]
+        
         groups = ["grp_cereals", "grp_meat", "grp_dairy_eggs", "grp_oils_fats", 
                   "grp_sugar_sweeteners", "grp_fruits_vegetables", "grp_starchy_roots_pulses", "grp_other"]
+        
+        group_labels = {
+            "grp_cereals": "Cereal",
+            "grp_meat": "Meat",
+            "grp_dairy_eggs": "Dairy & Eggs",
+            "grp_oils_fats": "Oils & Fats",
+            "grp_sugar_sweeteners": "Sugar",
+            "grp_fruits_vegetables": "Fruits & Veg",
+            "grp_starchy_roots_pulses": "Starchy Roots",
+            "grp_other": "Other"
+        }
         
         cy_y = cy_y.dropna(subset=["calories"] + groups)
         cy_y = cy_y[cy_y["calories"] > 0]
@@ -913,33 +1241,136 @@ def server(input, output, session):
         
         pca = PCA(n_components=2)
         pcs = pca.fit_transform(scaled)
+        var_explained = pca.explained_variance_ratio_ * 100  # percentage
         
         kmeans = KMeans(n_clusters=3, random_state=42, n_init='auto')
         clusters = kmeans.fit_predict(scaled)
         
+        # Auto-name clusters by what distinguishes them from global average
+        global_avg = shares.mean()
+        cluster_names = {}
+        for c_id in range(3):
+            mask = clusters == c_id
+            if mask.sum() == 0:
+                cluster_names[c_id] = f"Cluster {c_id+1}"
+                continue
+            cluster_avg = shares.iloc[mask.nonzero()[0]].mean()
+            # Find which food groups are most above the global average
+            deviation = cluster_avg - global_avg
+            top2 = deviation.nlargest(2)
+            labels = [group_labels.get(g, g) for g in top2.index]
+            cluster_names[c_id] = f"{labels[0]} & {labels[1]}"
+        
         plot_df = pd.DataFrame(pcs, columns=["PC1", "PC2"])
-        plot_df["Cluster"] = [f"Cluster {c+1}" for c in clusters]
+        plot_df["Cluster"] = [cluster_names[c] for c in clusters]
         plot_df["Country"] = cy_y["entity"].values
-        plot_df["iso3"] = cy_y["iso3"].values
         plot_df["Calories"] = cy_y["calories"].values
+        plot_df["Continent"] = cy_y["continent"].values
+        
+        # Add diet breakdown to hover
+        for g in groups:
+            plot_df[group_labels[g]] = shares[g].values.round(1)
+        
+        # Curated cluster colors
+        cluster_colors = ["#2563eb", "#e09530", "#16a34a"]
+        unique_clusters = sorted(plot_df["Cluster"].unique())
+        color_map = {name: cluster_colors[i % 3] for i, name in enumerate(unique_clusters)}
         
         fig = px.scatter(
             plot_df,
             x="PC1",
             y="PC2",
             color="Cluster",
+            size="Calories",
+            size_max=14,
             hover_name="Country",
-            text="iso3",
+            hover_data={
+                "Calories": ":.0f",
+                "Continent": True,
+                "Cereal": ":.1f",
+                "Meat": ":.1f",
+                "Dairy & Eggs": ":.1f",
+                "Fruits & Veg": ":.1f",
+                "PC1": False,
+                "PC2": False,
+            },
+            color_discrete_map=color_map,
             title=f"Country Dietary Profile Clusters ({year})",
-            color_discrete_sequence=px.colors.qualitative.Safe
+            labels={
+                "PC1": f"PC1 ({var_explained[0]:.1f}% variance)",
+                "PC2": f"PC2 ({var_explained[1]:.1f}% variance)",
+                "Calories": "Kcal/day",
+            },
         )
-        fig.update_traces(textposition='top center')
+
+        # Highlight clicked country with star marker (color matches anomaly map)
+        clicked = health_clicked_country()
+        if clicked and clicked in plot_df["Country"].values:
+            row = plot_df[plot_df["Country"] == clicked].iloc[0]
+            # Get residual color from health residuals
+            res_df = get_health_residuals()
+            metric = input.health_metric()
+            star_color = "#ef4444"  # fallback
+            if not res_df.empty and clicked in res_df["entity"].values:
+                res_row = res_df[res_df["entity"] == clicked].iloc[0]
+                max_abs = max(abs(res_df["residual"].min()), abs(res_df["residual"].max()), 1)
+                star_color = _residual_color(res_row["residual"], max_abs, metric)
+            fig.add_trace(go.Scatter(
+                x=[row["PC1"]],
+                y=[row["PC2"]],
+                mode="markers+text",
+                marker=dict(size=18, color=star_color, symbol="star", line=dict(width=1, color="white")),
+                text=[clicked],
+                textposition="top center",
+                textfont=dict(size=11, color=star_color, family="Poppins"),
+                name=f"★ {clicked} ({row['Cluster']})",
+                showlegend=True,
+            ))
+
+        fig.update_traces(
+            marker=dict(line=dict(width=0.5, color="rgba(0,0,0,0.15)")),
+            textposition='top center',
+            selector=dict(mode="markers"),  # only apply to scatter traces, not star
+        )
         fig.update_layout(
             margin={"r":10,"t":40,"l":10,"b":10},
             paper_bgcolor='rgba(0,0,0,0)',
-            plot_bgcolor='rgba(0,0,0,0)'
+            plot_bgcolor='rgba(0,0,0,0)',
+            xaxis=dict(showgrid=True, gridcolor="#f1f5f9", zeroline=True, zerolinecolor="#e2e8f0"),
+            yaxis=dict(showgrid=True, gridcolor="#f1f5f9", zeroline=True, zerolinecolor="#e2e8f0"),
+            legend=dict(
+                orientation="h",
+                yanchor="top", y=-0.12,
+                xanchor="center", x=0.5,
+                font=dict(size=10),
+            ),
+            uirevision="clusters",
         )
-        return fig
+
+        # Convert to FigureWidget for click interactivity
+        fw = go.FigureWidget(fig)
+
+        def on_cluster_click(trace, points, state):
+            if points.point_inds:
+                idx = points.point_inds[0]
+                try:
+                    name = trace.hovertext[idx] if trace.hovertext is not None else None
+                    if name and isinstance(name, str):
+                        health_clicked_country.set(name)
+                except Exception:
+                    pass
+
+        # Attach click handler to scatter traces (skip star highlight)
+        for trace in fw.data:
+            mode_str = str(getattr(trace, 'mode', '') or '')
+            name_str = str(getattr(trace, 'name', '') or '')
+            if 'markers' in mode_str and '★' not in name_str:
+                try:
+                    trace.on_click(on_cluster_click)
+                except Exception:
+                    pass
+
+        return fw
 
     @output
     @render_widget
@@ -989,13 +1420,62 @@ def server(input, output, session):
             name="Perfect Agreement",
             line=dict(color="#94a3b8", dash="dash")
         ))
+
+        # Highlight clicked country with residual-colored star
+        clicked = health_clicked_country()
+        if clicked and clicked in df["entity"].values:
+            row = df[df["entity"] == clicked].iloc[0]
+            # Get residual color from health residuals
+            res_df = get_health_residuals()
+            metric = input.health_metric()
+            star_color = "#ef4444"
+            if not res_df.empty and clicked in res_df["entity"].values:
+                res_row = res_df[res_df["entity"] == clicked].iloc[0]
+                r_max = max(abs(res_df["residual"].min()), abs(res_df["residual"].max()), 1)
+                star_color = _residual_color(res_row["residual"], r_max, metric)
+            pred_error = row["Predicted_Obesity"] - row["who_obesity_pct"]
+            fig.add_trace(go.Scatter(
+                x=[row["who_obesity_pct"]],
+                y=[row["Predicted_Obesity"]],
+                mode="markers+text",
+                marker=dict(size=16, color=star_color, symbol="star", line=dict(width=1, color="white")),
+                text=[clicked],
+                textposition="top center",
+                textfont=dict(size=11, color=star_color, family="Poppins"),
+                name=f"★ {clicked} (error: {pred_error:+.1f}%)",
+                showlegend=True,
+            ))
         
         fig.update_layout(
             margin={"r":10,"t":40,"l":10,"b":10},
             paper_bgcolor='rgba(0,0,0,0)',
-            plot_bgcolor='rgba(0,0,0,0)'
+            plot_bgcolor='rgba(0,0,0,0)',
+            uirevision="regression",
         )
-        return fig
+
+        # Convert to FigureWidget for click interactivity
+        fw = go.FigureWidget(fig)
+
+        def on_regression_click(trace, points, state):
+            if points.point_inds:
+                idx = points.point_inds[0]
+                try:
+                    name = trace.hovertext[idx] if trace.hovertext is not None else None
+                    if name and isinstance(name, str):
+                        health_clicked_country.set(name)
+                except Exception:
+                    pass
+
+        for trace in fw.data:
+            mode_str = str(getattr(trace, 'mode', '') or '')
+            name_str = str(getattr(trace, 'name', '') or '')
+            if 'markers' in mode_str and '★' not in name_str:
+                try:
+                    trace.on_click(on_regression_click)
+                except Exception:
+                    pass
+
+        return fw
 
     # ============================================================
     # TAB 3: Product-Level Outputs
