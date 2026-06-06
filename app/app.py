@@ -37,7 +37,116 @@ if not cy_path.exists():
 # Load and preprocess datasets
 cy = pd.read_parquet(cy_path)
 ch = pd.read_parquet(ch_path)
-products = pd.read_parquet(p_path)
+products_raw = pd.read_parquet(p_path)
+
+# Clean and standardize product category names
+def clean_product_categories(df_in):
+    df = df_in.copy()
+    import re
+    
+    # Custom mapping dictionary to translate/standardize categories
+    mapping = {
+        "Aliments Et Boissons \u00e0 Base De V\u00e9g\u00e9taux": "Plant-Based Foods And Beverages",
+        "Aliments Et Boissons \ufffd Base De V\ufffdg\ufffdtaux": "Plant-Based Foods And Beverages",
+        "Aliments Et Boissons   Base De Vgtaux": "Plant-Based Foods And Beverages",
+        "Aliments Et Boissons  Base De Vgtaux": "Plant-Based Foods And Beverages",
+        "Aliments Et Boissons A Base De Vegetaux": "Plant-Based Foods And Beverages",
+        "Produits Laitiers": "Dairies",
+        "Viandes Et D\u00e9riv\u00e9s": "Meats",
+        "Viandes Et D\ufffdriv\ufffds": "Meats",
+        "Viandes Et Derives": "Meats",
+        "Plats Pr\u00e9par\u00e9s": "Meals",
+        "Plats Pr\ufffdpar\ufffds": "Meals",
+        "Plats Prepares": "Meals",
+        "Boissons": "Beverages",
+        "Surgel\u00e9s": "Frozen Foods",
+        "Surgel\ufffds": "Frozen Foods",
+        "Surgeles": "Frozen Foods",
+        "Biscuits": "Snacks",
+        "Edulcorants": "Sweeteners",
+        "\u00c9dulcorants": "Sweeteners",
+        "\ufffddulcorants": "Sweeteners",
+        "Petit-D\u00e9jeuners": "Breakfasts",
+        "Petit-D\ufffdjeuners": "Breakfasts",
+        "Petit-Dejeuners": "Breakfasts",
+        "Produits De La Mer": "Seafood",
+        "Crales": "Cereals",
+        "En:Crales": "Cereals",
+        "En:C\u00e9r\u00e9ales": "Cereals",
+        "En:C\ufffdr\ufffdales": "Cereals",
+        
+        # German
+        "Pflanzliche Lebensmittel Und Getr\u00e4nke": "Plant-Based Foods And Beverages",
+        "Pflanzliche Lebensmittel Und Getr\ufffdnke": "Plant-Based Foods And Beverages",
+        "Pflanzliche Lebensmittel Und Getranke": "Plant-Based Foods And Beverages",
+        "Getr\u00e4nke": "Beverages",
+        "Getr\ufffdnke": "Beverages",
+        "Getranke": "Beverages",
+        "Imbiss": "Snacks",
+        
+        # Spanish / Italian / Portuguese
+        "Alimentos Y Bebidas De Origen Vegetal": "Plant-Based Foods And Beverages",
+        "Cibi E Bevande A Base Vegetale": "Plant-Based Foods And Beverages",
+        "L\u00e1cteos": "Dairies",
+        "L\ufffdcteos": "Dairies",
+        "Lacteos": "Dairies",
+        "Panader\u00eda": "Snacks",
+        "Panader\ufffda": "Snacks",
+        "Panaderia": "Snacks",
+        "Botanas": "Snacks",
+        "Latic\u00ednios": "Dairies",
+        "Laticinios": "Dairies",
+        "Productos A Base De Carne": "Meats",
+        
+        # Asian
+        "ขนม-ของว่าง": "Snacks",
+        "調味料": "Condiments",
+        "调味料": "Condiments",
+    }
+    
+    df["top_category"] = df["top_category"].fillna("Unknown").astype(str).str.strip()
+    
+    # Remove prefix like 'en:', 'fr:'
+    def remove_prefix(x):
+        if ":" in x:
+            parts = x.split(":", 1)
+            if len(parts[0]) <= 3:
+                return parts[1].strip()
+        return x
+    df["top_category"] = df["top_category"].apply(remove_prefix)
+    
+    # Replace unicode/mojibake variations
+    for k, v in mapping.items():
+        df["top_category"] = df["top_category"].str.replace(k, v, regex=False)
+        
+    df["top_category"] = df["top_category"].replace(mapping)
+    df["top_category"] = df["top_category"].str.title()
+    
+    # Standardize messy or overly descriptive names
+    messy_map = {
+        "Meats And Their Products": "Meats",
+        "Beverages And Beverages Preparations": "Beverages",
+        "Olive Oils From Italy": "Condiments",
+        "Biscotti Con Gocce Di Cioccolato E Avena": "Cookies / Snacks",
+        "Multi-Grain Flakes And Crunchy Granola Clusters": "Cereals",
+        "Baby Rainbow Carrots": "Vegetables",
+        "Shake Proteine": "Beverages",
+        "Brotaufstriche": "Spreads",
+        "Frutti Di Mare": "Seafood",
+        "Fresh Green Pesto": "Condiments",
+        "Raisins By Sainsbury'S": "Fruits",
+        "Cheese Sauce Mix": "Condiments",
+        "Hot Sauces": "Condiments",
+        "Rice Noodles": "Grains / Pasta",
+    }
+    df["top_category"] = df["top_category"].replace(messy_map)
+    
+    # Replace non-English/non-Latin characters with 'Other'
+    latin_pattern = re.compile(r"^[a-zA-Z0-9\s&/()\-,\.\'\"]+$")
+    df["top_category"] = df["top_category"].apply(lambda x: x if latin_pattern.match(x) else "Other")
+    return df
+
+products = clean_product_categories(products_raw)
 
 # Filter out old years and invalid entries
 cy = cy[cy['year'] >= 1961].copy()
@@ -46,7 +155,7 @@ ch = ch[ch['year'] >= 1975].copy()
 # Sort lookups for selectors
 countries_list = ["Global Average"] + sorted(cy["entity"].unique().tolist())
 continents_list = ["All"] + sorted([c for c in cy["continent"].dropna().unique() if c != "Other"])
-categories_list = ["All"] + sorted([cat for cat in products["top_category"].dropna().unique() if cat != "Unknown"])[:30] # Top 30 categories
+categories_list = ["All"] + sorted([cat for cat in products["top_category"].dropna().unique() if cat not in ("Unknown", "Other")])[:30] # Top 30 clean categories
 
 # Load ML models
 try:
@@ -223,6 +332,13 @@ app_ui = ui.page_navbar(
                     step=1,
                     sep="",
                 ),
+                ui.hr(),
+                ui.input_select(
+                    "h_country_select",
+                    "Country Highlight",
+                    choices=["None"] + countries_list[1:],
+                    selected="None",
+                ),
                 width=280,
             ),
             # Tab intro banner
@@ -293,11 +409,12 @@ app_ui = ui.page_navbar(
         "What's In Our Food?",
         ui.layout_sidebar(
             ui.sidebar(
-                ui.input_select(
+                ui.input_selectize(
                     "product_category",
                     "Product Category",
                     choices=categories_list,
                     selected="All",
+                    multiple=True,
                 ),
                 ui.input_checkbox_group(
                     "nova_levels",
@@ -491,9 +608,11 @@ def server(input, output, session):
         """Get product dataset filtered by sidebar selectors."""
         df = products.copy()
         
-        cat = input.product_category()
-        if cat != "All":
-            df = df[df["top_category"] == cat]
+        cats = input.product_category()
+        # cats is a tuple/list of strings when multiple=True.
+        # If 'All' is in it or it is empty, we show all products.
+        if cats and "All" not in cats:
+            df = df[df["top_category"].isin(cats)]
             
         novas = [float(n) for n in input.nova_levels()]
         df = df[df["nova_group"].isin(novas)]
@@ -1488,25 +1607,30 @@ def server(input, output, session):
         if df.empty:
             return go.Figure()
         
+        # Get top 15 categories by count to keep the chart clean and readable
+        top_cats = df["top_category"].value_counts().nlargest(15).index
+        df_filtered = df[df["top_category"].isin(top_cats)].copy()
+        
         # Group by top category and nutriscore grade
-        counts = df.groupby(["top_category", "nutriscore_grade"]).size().reset_index(name="count")
+        counts = df_filtered.groupby(["top_category", "nutriscore_grade"]).size().reset_index(name="count")
         
         # Capitalize grade
         counts["nutriscore_grade"] = counts["nutriscore_grade"].str.upper()
         
         fig = px.bar(
             counts,
-            x="top_category",
-            y="count",
+            y="top_category",
+            x="count",
             color="nutriscore_grade",
+            orientation="h",
             color_discrete_map={"A": "#038141", "B": "#85bb2f", "C": "#fecb02", "D": "#ee8100", "E": "#e63e11"},
             category_orders={"nutriscore_grade": ["A", "B", "C", "D", "E"]},
             labels={"top_category": "Food Category", "count": "Products Count", "nutriscore_grade": "Nutri-Score"},
-            title="Nutri-Score Grade Distribution by Category"
+            title="Nutri-Score Grade Distribution by Category (Top 15)"
         )
         fig.update_layout(
-            xaxis={'categoryorder':'total descending'},
-            margin={"r":10,"t":40,"l":10,"b":10},
+            yaxis={'categoryorder': 'total ascending'},
+            margin={"r":10,"t":40,"l":180,"b":10},
             paper_bgcolor='rgba(0,0,0,0)',
             plot_bgcolor='rgba(0,0,0,0)'
         )
@@ -1551,6 +1675,15 @@ def server(input, output, session):
         df = get_products_filtered().copy()
         if df.empty:
             return go.Figure()
+        
+        # Drop rows where fat or sugar is missing, as they cannot be plotted on a scatter plot
+        df = df.dropna(subset=["fat_100g", "sugars_100g"]).copy()
+        if df.empty:
+            return go.Figure()
+
+        # Fill missing values for hover info to avoid out-of-range floats (NaNs) in trace serialization
+        df["product_name"] = df["product_name"].fillna("Unknown Product")
+        df["brands"] = df["brands"].fillna("Unknown Brand")
         
         # Sample for rendering performance if too large
         if len(df) > 1500:
