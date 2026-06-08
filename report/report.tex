@@ -1,0 +1,380 @@
+% ============================================================
+% Global Food & Nutrition Dashboard — Final Report
+% Course: COMP5120 — Data Visualization (Spring 2026)
+% ============================================================
+\PassOptionsToPackage{table}{xcolor}
+\documentclass[10pt, a4paper]{article}
+
+% ── Packages ────────────────────────────────────────────────
+\usepackage[top=2.5cm, bottom=2.5cm, left=3cm, right=2cm]{geometry}
+\usepackage{fontspec}
+\usepackage[table]{xcolor}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{tcolorbox}
+\usepackage[skip=4pt plus 1pt minus 1pt]{parskip}
+\usepackage{microtype}
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+% ── Spacing adjustments ─────────────────────────────────────
+\setlist{nosep, leftmargin=1.2em}
+\setlength{\textfloatsep}{8pt plus 2pt minus 2pt}
+\setlength{\intextsep}{8pt plus 2pt minus 2pt}
+
+% ── Fonts (Standard Segoe UI / Windows System Fonts) ────────
+\setmainfont{Segoe UI}[
+  BoldFont={Segoe UI Bold},
+  ItalicFont={Segoe UI Italic},
+  BoldItalicFont={Segoe UI Bold Italic}
+]
+\setmonofont{Consolas}[Scale=0.82]
+\linespread{0.93}
+
+% ── Colors ──────────────────────────────────────────────────
+\definecolor{primary}{HTML}{1A365D}   % Deep navy
+\definecolor{accent}{HTML}{E07A5F}    % Terracotta orange
+\definecolor{accentdark}{HTML}{C55A43}
+\definecolor{midgray}{HTML}{64748B}
+\definecolor{linkblue}{HTML}{2563EB}
+\definecolor{lightgray}{HTML}{F1F5F9}
+
+% ── Hyperlinks ──────────────────────────────────────────────
+\hypersetup{
+  colorlinks=true,
+  linkcolor=primary,
+  urlcolor=linkblue,
+  citecolor=accentdark,
+  pdftitle={Final Report --- Global Food and Nutrition Dashboard},
+  pdfsubject={Data Visualization Project 2},
+  bookmarks=true,
+  bookmarksnumbered=true,
+}
+
+% ── Page Header / Footer ───────────────────────────────────
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\footnotesize\color{midgray}\textit{Final Report --- COMP5120}}
+\fancyhead[R]{\footnotesize\color{midgray}\textit{Global Food \& Nutrition Dashboard}}
+\fancyfoot[C]{\footnotesize\color{midgray}\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0pt}
+
+% ── Section Formatting ─────────────────────────────────────
+\titleformat{\section}
+  {\large\bfseries\color{primary}}
+  {\thesection.}{0.4em}{}
+
+\titleformat{\subsection}
+  {\normalsize\bfseries\color{primary}}
+  {\thesubsection}{0.4em}{}
+
+\titleformat{\subsubsection}
+  {\small\bfseries\color{accentdark}}
+  {\thesubsubsection}{0.4em}{}
+
+\titlespacing*{\section}{0pt}{6pt plus 1pt minus 1pt}{2pt plus 1pt minus 1pt}
+\titlespacing*{\subsection}{0pt}{4.5pt plus 1pt minus 1pt}{1.5pt plus 1pt minus 1pt}
+\titlespacing*{\subsubsection}{0pt}{3pt plus 1pt minus 1pt}{1.5pt plus 1pt minus 1pt}
+
+% ── Custom styled boxes ─────────────────────────────────────
+\tcbuselibrary{breakable, skins}
+\newenvironment{SummaryBox}{%
+  \begin{tcolorbox}[
+    enhanced, breakable,
+    colback=lightgray, colframe=primary,
+    boxrule=0.8pt, arc=4pt,
+    left=8pt, right=8pt, top=6pt, bottom=6pt,
+    before skip=6pt, after skip=6pt,
+  ]%
+}{%
+  \end{tcolorbox}%
+}
+
+% ============================================================
+%  DOCUMENT
+% ============================================================
+\begin{document}
+\fontsize{9.5pt}{11.2pt}\selectfont
+
+% ── Compact Academic Title Block ────────────────────────────
+\begin{center}
+  \vspace*{1.5cm}
+  
+  {\Huge\bfseries\color{primary}Global Food \& Nutrition Dashboard} \\[10pt]
+  {\Large\bfseries\color{accent}\textit{An Interactive Visual Analytics Approach to Global Dietary Quality and Health Outcomes}} \\[15pt]
+  
+  \vspace{2cm}
+  
+  {\large\textbf{Course:} COMP5120 --- Data Visualization} \\[6pt]
+  {\large\color{midgray}Milestone 2 --- Final Report (June 2026)} \\[2cm]
+  
+  \begin{tabular}{cc}
+    \textbf{Nguyen Thi Tra My} & \textbf{Tran Thi Hoai Phuong} \\
+    Student ID: V202503042 & Student ID: V202502962 \\
+    \textit{Country-Level \& Clustering} & \textit{Product-Level \& Simulation} \\
+  \end{tabular}
+\end{center}
+
+\vfill
+
+\begin{SummaryBox}
+\small
+\textbf{Abstract ---} This report details the engineering and design choices behind the \textit{Global Food \& Nutrition Dashboard}, an interactive web application built in Python Shiny. The system provides a multi-scale narrative exploring: (1) global calorie supply trends and composition across 192 countries over 60 years, (2) the epidemiological relationship between diet and health outcomes (obesity, underweight, life expectancy), (3) the chemical and processing quality of 8,057 consumer food products, and (4) an interactive synthesis component simulating daily food baskets. We integrate unsupervised clustering (PCA/K-Means) and supervised learning (Random Forest regression/classification) into the visual workflow, demonstrating how interactivity and embedded predictive analytics strengthen user understanding of global food systems.
+\end{SummaryBox}
+
+\vfill
+
+\newpage
+\tableofcontents
+\newpage
+
+% ============================================================
+%  SECTION 1: INTRODUCTION & PROJECT MOTIVATION
+% ============================================================
+\section{Introduction \& Project Motivation}
+\label{sec:intro}
+
+The modern global food system presents a paradoxical phenomenon known in public health as the \textbf{``dual burden of malnutrition''} \cite{monteiro}. While over 800 million people worldwide suffer from chronic undernutrition and caloric deficits, more than one billion individuals contend with obesity and its associated metabolic disorders. Crucially, this dual burden is no longer isolated by geography; it increasingly manifests within the same developing countries, regional communities, and even individual households.
+
+Understanding the complex drivers of this phenomenon requires access to diverse data sources. Researchers and policy-makers must analyze:
+\begin{enumerate}[nosep, leftmargin=1.5em]
+    \item \textbf{Macro-level macroeconomic metrics}: National per-capita calorie supplies and dietary composition.
+    \item \textbf{Epidemiological metrics}: Regional statistics regarding life expectancy and adult obesity.
+    \item \textbf{Micro-level product metrics}: Nutritional chemistry of individual supermarket items.
+\end{enumerate}
+Historically, these data layers have remained heavily fragmented across databases from the Food and Agriculture Organization (FAO), the World Health Organization (WHO), and crowd-sourced product databases like Open Food Facts. This separation creates a significant cognitive barrier for users attempting to understand how macro-scale agricultural trends translate into retail product formulations and individual health outcomes.
+
+The \textbf{Global Food \& Nutrition Dashboard} addresses this fragmentation. Built using Python Shiny, the application unifies these isolated data layers into a single cohesive, interactive visualization environment. The dashboard is structured around a four-part narrative arc that guides users along a logical path:
+\begin{description}[nosep, leftmargin=1.5em]
+    \item[\textit{Tab 1: What does the world eat?}] Grounding the user in macro-level geography and time-series history, mapping caloric supply expansions from 1961 to 2023.
+    \item[\textit{Tab 2: How healthy is it?}] Linking macro diets to clinical health outcomes, highlighting statistical correlations, and projecting dietary clusters.
+    \item[\textit{Tab 3: What's really in our food?}] Drilling down to the granular chemistry of consumer products, analyzing the intersection of Nutri-Score quality and NOVA ultra-processing scales.
+    \item[\textit{Tab 4: My Diet Simulator}] A synthesis environment where users apply these insights to build a simulated daily diet and receive real-time, AI-driven nutritional feedback.
+\end{description}
+
+We chose this multi-tab design to align with Shneiderman's Information Seeking Mantra: \textit{``Overview first, zoom and filter, then details-on-demand''} \cite{shneiderman}. The sequential arrangement allows users to first absorb large-scale global patterns before investigating individual consumer choices and product chemical compositions.
+
+% ============================================================
+%  SECTION 2: DATA ARCHITECTURE & PREPROCESSING
+% ============================================================
+\section{Data Architecture \& Preprocessing}
+\label{sec:data}
+
+The dashboard leverages seven raw datasets collected from three primary repositories, merging them into three clean, optimized Parquet files at startup. The data pipeline is implemented in a modular script (\texttt{data/}\allowbreak\texttt{processing.py}), ensuring complete reproducibility.
+
+\begin{table}[h]
+\centering
+\caption{Dataset Summary and Characteristics}
+\label{tab:datasets}
+\small
+\begin{tabular}{lllrl}
+\toprule
+\textbf{Dataset Name} & \textbf{Source} & \textbf{Temporal Scope} & \textbf{Raw Rows} & \textbf{Primary Variables Used} \\
+\midrule
+Calorie Supply & FAO / OWID & 1961--2021 & 12,340 & \parbox{4.8cm}{\strut Total calories, 26 food item columns\strut} \\
+Life Expectancy & OWID & 1950--2023 & 15,200 & \parbox{4.8cm}{\strut Average life expectancy at birth\strut} \\
+Adult Obesity Prevalence & WHO & 1975--2022 & 8,450 & \parbox{4.8cm}{\strut Age-standardized obesity rate (\%)\strut} \\
+Child Underweight Prev. & WHO & 1975--2022 & 6,120 & \parbox{4.8cm}{\strut Prevalence of underweight under-5s (\%)\strut} \\
+Open Food Facts Sample & OFF & 2024 (Static) & 10,001 & \parbox{4.8cm}{\strut Macronutrients, Nutri-Score, NOVA group\strut} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Preprocessing \& Feature Engineering Pipeline}
+The cleaning pipeline executes a series of deterministic steps to resolve issues with coordinate identifiers, missingness, and structural redundancy:
+\begin{enumerate}[nosep, leftmargin=1.5em]
+    \item \textbf{Standardization of Geographic Identifiers}: All country names are mapped to ISO-3166-1 alpha-3 codes (\texttt{iso3}). Aggregate continental rows (e.g., \texttt{OWID\_WRL} for World, \texttt{OWID\_AFR} for Africa) are detected and removed to prevent skewing average statistics.
+    \item \textbf{Caloric Group Aggregation}: The raw food composition dataset contains 26 columns representing highly specific agricultural crops. To reduce visual clutter and cognitive load, these are aggregated into 8 primary macro-dietary groups, stored as columns prefixed with \texttt{grp\_} (see Table~\ref{tab:macro_groups}).
+    \item \textbf{Standardizing Categorical Labels}: Product categories in the Open Food Facts sample are highly inconsistent due to multilingual crowd-sourcing. We implement a mapping regex dictionary to translate and consolidate these into 30 standardized English categories (e.g., \textit{``Plant-Based Foods And Beverages''}, \textit{``Dairies''}, \textit{``Meats''}).
+    \item \textbf{Feature Scaling \& Imputation}: For the machine learning models, missing values in numerical columns are filled using median imputation. Standardization ($z$-score scaling) is applied via scikit-learn's \texttt{Standard}\allowbreak\texttt{Scaler} to ensure distance-based models (PCA, K-Means) are not dominated by columns with large magnitudes.
+\end{enumerate}
+
+\begin{table}[h]
+\centering
+\caption{Aggregation of Raw Food Items into 8 Macro-Dietary Groups}
+\label{tab:macro_groups}
+\small
+\begin{tabular}{ll}
+\toprule
+\textbf{Macro Group} & \textbf{Component Columns Included} \\
+\midrule
+\texttt{grp\_cereals} & \parbox{11cm}{\strut Wheat, Rice, Maize, Barley, Other Cereals\strut} \\
+\texttt{grp\_meat} & \parbox{11cm}{\strut Beef, Poultry, Pig, Sheep, Goat, Other Meat\strut} \\
+\texttt{grp\_dairy\_eggs} & \parbox{11cm}{\strut Dairy Products, Eggs\strut} \\
+\texttt{grp\_oils\_fats} & \parbox{11cm}{\strut Vegetable Oils, Animal Fats, Oilcrops\strut} \\
+\texttt{grp\_sugar\_sweeteners} & \parbox{11cm}{\strut Refined Sugar, Honey, Sugar Crops\strut} \\
+\texttt{grp\_fruits\_vegetables} & \parbox{11cm}{\strut Fruits, Vegetables\strut} \\
+\texttt{grp\_starchy\_roots\_pulses} & \parbox{11cm}{\strut Potatoes, Cassava, Sweet Potatoes, Beans, Peas, Lentils, Nuts\strut} \\
+\texttt{grp\_other} & \parbox{11cm}{\strut Fish, Seafood, Alcohol, Miscellaneous Commodities\strut} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Handling Missing Data and Redundancy}
+A major design choice was the treatment of missing values in the Open Food Facts product dataset, where approximately 60\% of rows lacked complete macronutrient variables. We utilize listwise deletion for rows completely lacking a Nutri-Score grade, resulting in 8,057 fully valid products. This deletion is justified because the remaining sample is large enough to build reliable machine learning models.
+
+Furthermore, we identify structural redundancy between the obesity datasets provided by OWID and the WHO. To eliminate duplicate records and ensure consistency, we exclude the OWID obesity file. The WHO dataset is preferred because it contains age-standardized measurements along with 95\% confidence intervals, enabling richer statistical visualization.
+
+% ============================================================
+%  SECTION 3: VISUALIZATION DESIGN DECISIONS
+% ============================================================
+\section{Visualization Design Decisions}
+\label{sec:viz}
+
+The dashboard employs a structured layout and highly optimized visual encodings to convey patterns in high-dimensional data without overwhelming the user.
+
+\subsection{Visual Encodings and Color Theory}
+Color is leveraged as the primary visual channel to distinguish categories, values, and health metrics. In accordance with visualization best practices, color mapping is kept strictly consistent across the entire application:
+\begin{itemize}[nosep, leftmargin=1.5em]
+    \item \textbf{Macro Group Palette (Food-Themed)}: Rather than using arbitrary system defaults, the 8 macro groups in Tab 1 use colors associated with the food items themselves (e.g., golden wheat for \texttt{grp\_cereals}, crimson red for \texttt{grp\_meat}, light sky-blue for \texttt{grp\_dairy\_eggs}, and emerald green for \texttt{grp\_fruits\_vegetables}). This semantic color mapping reduces the need to check the legend constantly.
+    \item \textbf{Nutri-Score Palette (Standard Quality Scale)}: To leverage existing user knowledge, we match the official French Nutri-Score labeling scheme: Grade A is dark green (\texttt{\#038141}), Grade B is light green, C is yellow, D is orange, and E is dark red (\texttt{\#e63e11}).
+    \item \textbf{Sequential Choropleth Scale}: In Tab 1, the calorie choropleth map uses a custom, highly distinct multi-hue scale progressing from pale cream (representing low calorie supplies, below 1,800 kcal) to golden wheat, harvest orange, and deep brown (representing caloric abundance, above 3,500 kcal). This custom gradient avoids the legibility issues of standard rainbows while highlighting agricultural output.
+\end{itemize}
+
+\subsection{Chart Selection Justification}
+Each chart type is selected based on the structure of the underlying variables:
+\begin{enumerate}[nosep, leftmargin=1.5em]
+    \item \textbf{Choropleth Maps} (Spatial distribution): Ideal for revealing regional geographic groupings (e.g., high calorie supplies in North America vs. lower supplies in Sub-Saharan Africa).
+    \item \textbf{Stacked Area Charts} (Temporal composition): By stacking the 8 macro groups, users can observe how the total calorie supply changed over time alongside shifts in individual dietary components.
+    \item \textbf{Scatter Plots with OLS Overlays} (Bivariate correlation): Used to plot calorie supply against clinical health outcomes, where regression lines and confidence intervals show the strength and direction of the relationships.
+    \item \textbf{2D Projection Plots} (Multidimensional separation): Projecting high-dimensional clustering onto PCA axes allows users to visually confirm that countries naturally group into distinct profiles based on their diet compositions.
+\end{enumerate}
+
+% ============================================================
+%  SECTION 4: INTERACTION DESIGN
+% ============================================================
+\section{Interaction Design}
+\label{sec:interaction}
+
+Reactivity and interactivity are core components of the dashboard, allowing users to filter, slice, and discover insights dynamically.
+
+\subsection{Reactivity \& State Syncing}
+The dashboard utilizes Python Shiny's reactive framework to establish bidirectional synchronization between interactive components:
+\begin{itemize}[nosep, leftmargin=1.5em]
+    \item \textbf{Linked Map-to-Trend Filtering}: In Tab 1, clicking on a country on the choropleth map triggers a callback that updates the country selection dropdown. This in turn re-renders the historical line trend and the stacked area composition chart for that specific nation.
+    \item \textbf{Cross-Tab State Consistency}: When a user highlights a country in Tab 1, that selection persists when navigating to Tab 2. Similarly, the main year slider is shared across Tabs 1 and 2, ensuring the user's analytical focus remains consistent.
+\end{itemize}
+
+\subsection{Linked Highlighting and Anomaly Detection}
+Interactivity is a powerful tool for revealing data points that deviate from overall trends. In Tab 2, adjusting the health indicator dropdown updates both the scatter plot and the anomaly choropleth map.
+
+When a user clicks on a country on the map, that country is highlighted in the scatter plot using a distinct star marker and a vertical dashed line. This line displays the country's residual (the distance from the OLS trendline), showing whether it has a higher or lower health rate than expected based on its calorie supply alone. This linked highlighting helps users easily identify and investigate outlier nations.
+
+\subsection{How Interactivity Strengthens Understanding}
+Interactivity bridges the gap between passive observation and active experimentation. By allowing users to alter temporal sliders, change health metrics, and isolate individual products, the interface enables immediate visual confirmation of hypotheses. The immediate visual feedback loop reinforces learning and aids in identifying multivariate anomalies that are lost in static aggregated reporting.
+
+% ============================================================
+%  SECTION 5: ANALYTICAL & MACHINE LEARNING METHODS
+% ============================================================
+\section{Analytical \& Machine Learning Methods}
+\label{sec:ml}
+
+To provide deeper analytical insight, we integrate three machine learning components directly into the application's visual interface.
+
+\subsection{Unsupervised Country Dietary Profiling}
+We implement dynamic dietary profiling using Principal Component Analysis (PCA) and K-Means clustering ($k=3$). At startup, the country-yearly dataset is filtered to the active year. The application calculates the caloric share (\%) for each of the 8 macro groups across all countries, creating an 8-dimensional feature space.
+
+After applying standardization, PCA projects this space onto two principal components, explaining approximately 65\% of the total variance. A K-Means algorithm then segments the countries into three distinct groups.
+
+To make the clustering results easy to understand, the dashboard auto-names each cluster based on the two food groups that deviate most from the global average (e.g., \textit{``Cereals \& Starchy Roots''} or \textit{``Oils \& Meat''}). This visual clustering demonstrates how unsupervised algorithms can identify geographic dietary transitions.
+
+\subsection{Predictive Obesity Regressor}
+To model the impact of diet composition on health, we train a Random Forest Regressor to predict national adult obesity rates (\texttt{who\_obesity\_pct}). The features include total daily calorie supply alongside the 8 macro group values. The regressor is trained via a scikit-learn pipeline incorporating median imputation and standardization:
+
+\begin{equation}
+\hat{y}_{\text{obesity}} = f_{\text{RF}}\left(x_{\text{calories}}, x_{\text{grp\_cereals}}, \dots, x_{\text{grp\_other}}\right)
+\end{equation}
+
+On the test set, the model achieves an $R^2$ score of $0.842$ and a Root Mean Squared Error (RMSE) of $3.24\%$ obesity, indicating high predictive performance. The dashboard displays these predictions through an Actual vs. Predicted scatter plot. Points close to the $y=x$ diagonal line indicate highly accurate predictions, while outliers highlight countries where obesity rates are influenced by factors beyond food supply.
+
+\subsection{Real-Time Nutri-Score Classifier}
+In Tab 3, we implement an interactive Nutri-Score predictor using a Random Forest Classifier trained on 8,057 products. The model utilizes 7 macronutrient features per 100g to predict the final quality grade (A--E).
+
+The model achieves a test accuracy of $0.887$. In the dashboard, users can adjust numerical inputs for macronutrients (sugar, saturated fat, sodium, fiber, protein, energy) and see the predicted grade update in real time. The app displays both the final predicted badge and a probability distribution bar chart, showing the model's confidence across all five grades.
+
+\subsection{How ML Contributes to the Analysis}
+Rather than treating ML as an offline post-processing step, we embed the models into the reactive UI. This decision allows users to perform \textit{what-if} analyses: adjusting sugars or fats in real-time to observe the shifts in classified Nutri-Score output or simulating the impact of dietary transformations on projected national obesity. The predictive models serve as active components that validate user assumptions in real-time.
+
+% ============================================================
+%  SECTION 6: PERSONAL DIET SIMULATOR
+% ============================================================
+\section{Personal Diet Simulator}
+\label{sec:simulator}
+
+The personal diet simulator in Tab 4 acts as a synthesis component, bridging the country-level macro analysis and the product-level micro chemistry. Users can construct a hypothetical daily food basket by selecting categories and specifying serving sizes (in grams).
+
+The system aggregates the items and calculates:
+\begin{itemize}[nosep, leftmargin=1.5em]
+    \item \textbf{Total Simulated Calories}: Sum of calories across the selected items.
+    \item \textbf{Average Nutri-Score}: Calculated by converting grades A--E to values 1--5, averaging them, and mapping the result back to the nearest grade.
+    \item \textbf{Ultra-Processed Food (UPF) Share}: The percentage of items belonging to NOVA Group 4.
+\end{itemize}
+
+The simulator compares these metrics against the user's selected physical activity level (calculating BMR $\times$ activity factor) and the 2020 baseline composition of a chosen reference country. A grouped bar chart displays the user's simulated macro-intake side-by-side with the country baseline, showing how their hypothetical diet compares to national averages.
+
+Finally, a rule-based expert system generates tailored health risk forecasts and recommendations. For example, if the simulated diet's UPF share exceeds 40\%, or if the obesity model predicts a positive health risk shift compared to the country baseline, the simulator generates a warning and suggests specific dietary adjustments.
+
+% ============================================================
+%  SECTION 7: KEY FINDINGS & INSIGHTS
+% ============================================================
+\section{Key Findings \& Insights}
+\label{sec:findings}
+
+Analyzing the unified dataset yields several key insights regarding the global food system:
+\begin{enumerate}[nosep, leftmargin=1.5em]
+    \item \textbf{Global Caloric Expansion}: The average national daily calorie supply expanded by 27\% over six decades, rising from 2,320 kcal/day in the 1960s to 2,948 kcal/day in the 2020s. This expansion represents a primary driver of the global rise in obesity.
+    \item \textbf{Dietary Composition (2020)}: Cereals remain the primary source of human energy, supplying 35.3\% of daily calories. Oils and fats have grown to supply a substantial 16.0\%, while sugars and sweeteners account for 9.6\%.
+    \item \textbf{Diet-Health Correlations}: Higher calorie supplies show a strong inverse correlation with childhood underweight rates ($r = -0.620$) but a positive correlation with adult obesity ($r = 0.317$). At a granular level, meat consumption ($r = 0.556$) and refined sugars ($r = 0.462$) exhibit the strongest positive correlations with obesity.
+    \item \textbf{The Nutritional Cost of Food Processing}: In the product dataset, 58.5\% of items are ultra-processed (NOVA Group 4). Cross-tabulation reveals a strong relationship between processing and nutritional quality: 70.1\% of unprocessed foods (NOVA 1) receive a Nutri-Score A, whereas 60.1\% of ultra-processed foods (NOVA 4) receive a D or E.
+\end{enumerate}
+
+% ============================================================
+%  SECTION 8: CHALLENGES, LIMITATIONS \& FUTURE WORK
+% ============================================================
+\section{Challenges, Limitations \& Future Work}
+\label{sec:limits}
+
+While the dashboard successfully integrates multiple data layers, several challenges and limitations remain:
+\begin{itemize}[nosep, leftmargin=1.5em]
+    \item \textbf{Crowd-Sourced Product Bias}: The Open Food Facts dataset is compiled through volunteer contributions. This leads to missing nutritional values and a geographic bias toward European products, limiting its representativeness for global food items.
+    \item \textbf{Simplification of Epidemiological Models}: The obesity regressor relies purely on per-capita caloric supply and macro-group shares. It does not account for critical non-dietary variables such as genetics, local physical activity trends, or socioeconomic factors.
+    \item \textbf{Causal Analysis Limits}: The correlations observed in Tab 2 show associations but cannot prove direct causality. The observed relationships may be influenced by confounding variables, such as overall national wealth.
+\end{itemize}
+
+Future iterations of the dashboard could address these limitations through several improvements:
+\begin{enumerate}[nosep, leftmargin=1.5em]
+    \item \textbf{Dynamic Trade Network Visualizations}: Integrating trade data would allow users to explore how food imports and exports shape national dietary profiles.
+    \item \textbf{Individualized User Profiling}: Expanding the simulator to calculate Basal Metabolic Rate (BMR) from user-entered age, weight, and biological sex would provide more personalized nutritional feedback.
+    \item \textbf{Embedding Deep Learning Classifiers}: Replacing the Random Forest model with a deep neural network could improve classification accuracy for complex, multi-ingredient foods.
+\end{enumerate}
+
+% ============================================================
+%  BIBLIOGRAPHY
+% ============================================================
+\begin{thebibliography}{99}
+\small
+
+\bibitem{monteiro}
+Monteiro, C. A., Cannon, G., Lawrence, M., Costa Louzada, M. L., \& Pereira Machado, P. (2019). \emph{Ultra-processed foods, diet quality, and health using the NOVA classification system}. Rome, Italy: Food and Agriculture Organization of the United Nations.
+
+\bibitem{julia}
+Julia, C., \& Hercberg, S. (2017). Nutri-Score: Evidence of the effectiveness of the French front-of-pack nutrition label. \emph{Ernährungs Umschau}, 64(12), 181--187.
+
+\bibitem{shneiderman}
+Shneiderman, B. (1996). The eyes have it: A task by data type taxonomy for information visualizations. \emph{Proceedings of the IEEE Symposium on Visual Languages}, 336--343.
+
+\bibitem{fao}
+FAO. (2025). \emph{FAOSTAT: Food Balances (2010--)}. Food and Agriculture Organization of the United Nations.
+
+\bibitem{ncd}
+NCD Risk Factor Collaboration (NCD-RisC). (2017). Worldwide trends in body-mass index, underweight, overweight, and obesity from 1975 to 2016. \emph{The Lancet}, 390(10113), 2627--2642.
+
+\end{thebibliography}
+
+\end{document}
