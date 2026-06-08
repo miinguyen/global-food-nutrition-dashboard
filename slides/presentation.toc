@@ -1,0 +1,7 @@
+\beamer@sectionintoc {1}{Introduction \& Motivation}{3}{0}{1}
+\beamer@sectionintoc {2}{Dataset Overview}{4}{0}{2}
+\beamer@sectionintoc {3}{Architecture \& Techniques}{5}{0}{3}
+\beamer@sectionintoc {4}{Machine Learning Integration}{6}{0}{4}
+\beamer@sectionintoc {5}{Dashboard Walkthrough}{7}{0}{5}
+\beamer@sectionintoc {6}{Findings \& Lessons Learnt}{11}{0}{6}
+\beamer@sectionintoc {7}{Q \& A}{12}{0}{7}
