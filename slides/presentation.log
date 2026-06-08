@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.4.27)  8 JUN 2026 14:01
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.4.27)  8 JUN 2026 14:21
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -614,8 +614,23 @@ Overfull \hbox (3.54456pt too wide) in paragraph at lines 15--15
  []
 
 
+Overfull \hbox (12.18881pt too wide) detected at line 15
+  [] [][] [][] [][] [][] [][][][][] [][] [][]  
+ []
+
+
 Overfull \hbox (3.54456pt too wide) in paragraph at lines 22--22
  [][]  
+ []
+
+
+Overfull \hbox (12.18881pt too wide) detected at line 22
+  [] [][] [][] [][] [][] [][][][][] [][] [][]  
+ []
+
+
+Overfull \hbox (12.18881pt too wide) has occurred while \output is active
+  [] [][] [][] [][] [][] [][][][][] [][] [][]  
  []
 
 
@@ -630,8 +645,18 @@ Overfull \hbox (3.54456pt too wide) in paragraph at lines 26--26
  [][]  
  []
 
+
+Overfull \hbox (12.18881pt too wide) detected at line 26
+  [] [][] [][] [][] [][] [][][][][] [][] [][]  
+ []
+
 (./presentation.toc)
 Overfull \vbox (6.45157pt too high) detected at line 26
+ []
+
+
+Overfull \hbox (12.18881pt too wide) has occurred while \output is active
+  [] [][] [][] [][] [][] [][][][][] [][] [][]  
  []
 
 
@@ -646,6 +671,11 @@ Overfull \hbox (3.54456pt too wide) in paragraph at lines 39--39
  [][]  
  []
 
+
+Overfull \hbox (12.18881pt too wide) detected at line 39
+  [] [][] [][] [][] [][] [][][][][] [][] [][]  
+ []
+
 LaTeX Font Info:    Trying to load font information for U+msa on input line 39.
 (/Users/miinguyen/Library/TinyTeX/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
@@ -654,6 +684,11 @@ LaTeX Font Info:    Trying to load font information for U+msb on input line 39.
  (/Users/miinguyen/Library/TinyTeX/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 )
+Overfull \hbox (12.18881pt too wide) has occurred while \output is active
+  [] [][] [][] [][] [][] [][][][][] [][] [][]  
+ []
+
+
 Overfull \hbox (3.54456pt too wide) has occurred while \output is active
  [][]  
  []
@@ -663,6 +698,16 @@ Overfull \hbox (3.54456pt too wide) has occurred while \output is active
 ]
 Overfull \hbox (3.54456pt too wide) in paragraph at lines 63--63
  [][]  
+ []
+
+
+Overfull \hbox (12.18881pt too wide) detected at line 63
+  [] [][] [][] [][] [][] [][][][][] [][] [][]  
+ []
+
+
+Overfull \hbox (12.18881pt too wide) has occurred while \output is active
+  [] [][] [][] [][] [][] [][][][][] [][] [][]  
  []
 
 
@@ -678,6 +723,16 @@ Overfull \hbox (3.54456pt too wide) in paragraph at lines 81--81
  []
 
 
+Overfull \hbox (12.18881pt too wide) detected at line 81
+  [] [][] [][] [][] [][] [][][][][] [][] [][]  
+ []
+
+
+Overfull \hbox (12.18881pt too wide) has occurred while \output is active
+  [] [][] [][] [][] [][] [][][][][] [][] [][]  
+ []
+
+
 Overfull \hbox (3.54456pt too wide) has occurred while \output is active
  [][]  
  []
@@ -687,6 +742,16 @@ Overfull \hbox (3.54456pt too wide) has occurred while \output is active
 ]
 Overfull \hbox (3.54456pt too wide) in paragraph at lines 95--95
  [][]  
+ []
+
+
+Overfull \hbox (12.18881pt too wide) detected at line 95
+  [] [][] [][] [][] [][] [][][][][] [][] [][]  
+ []
+
+
+Overfull \hbox (12.18881pt too wide) has occurred while \output is active
+  [] [][] [][] [][] [][] [][][][][] [][] [][]  
  []
 
 
@@ -701,11 +766,21 @@ Overfull \hbox (3.54456pt too wide) in paragraph at lines 103--103
  [][]  
  []
 
-<tab1.png, id=535, 1405.25pt x 903.375pt>
-File: tab1.png Graphic file (type png)
-<use tab1.png>
-Package pdftex.def Info: tab1.png  used on input line 103.
-(pdftex.def)             Requested size: 263.8268pt x 169.60294pt.
+
+Overfull \hbox (12.18881pt too wide) detected at line 103
+  [] [][] [][] [][] [][] [][][][][] [][] [][]  
+ []
+
+<sceen1.png, id=474, 1474.50874pt x 490.83376pt>
+File: sceen1.png Graphic file (type png)
+<use sceen1.png>
+Package pdftex.def Info: sceen1.png  used on input line 103.
+(pdftex.def)             Requested size: 398.32518pt x 132.59428pt.
+
+Overfull \hbox (12.18881pt too wide) has occurred while \output is active
+  [] [][] [][] [][] [][] [][][][][] [][] [][]  
+ []
+
 
 Overfull \hbox (3.54456pt too wide) has occurred while \output is active
  [][]  
@@ -713,16 +788,26 @@ Overfull \hbox (3.54456pt too wide) has occurred while \output is active
 
 [7
 
- <./tab1.png (PNG copy)>]
+ <./sceen1.png>]
 Overfull \hbox (3.54456pt too wide) in paragraph at lines 109--109
  [][]  
  []
 
-<tab2.png, id=605, 1405.25pt x 903.375pt>
-File: tab2.png Graphic file (type png)
-<use tab2.png>
-Package pdftex.def Info: tab2.png  used on input line 109.
-(pdftex.def)             Requested size: 263.8268pt x 169.60294pt.
+
+Overfull \hbox (12.18881pt too wide) detected at line 109
+  [] [][] [][] [][] [][] [][][][][] [][] [][]  
+ []
+
+<sceen2.png, id=539, 1475.5125pt x 491.8375pt>
+File: sceen2.png Graphic file (type png)
+<use sceen2.png>
+Package pdftex.def Info: sceen2.png  used on input line 109.
+(pdftex.def)             Requested size: 398.32616pt x 132.77538pt.
+
+Overfull \hbox (12.18881pt too wide) has occurred while \output is active
+  [] [][] [][] [][] [][] [][][][][] [][] [][]  
+ []
+
 
 Overfull \hbox (3.54456pt too wide) has occurred while \output is active
  [][]  
@@ -730,16 +815,26 @@ Overfull \hbox (3.54456pt too wide) has occurred while \output is active
 
 [8
 
- <./tab2.png (PNG copy)>]
+ <./sceen2.png>]
 Overfull \hbox (3.54456pt too wide) in paragraph at lines 115--115
  [][]  
  []
 
-<tab3.png, id=675, 1405.25pt x 903.375pt>
-File: tab3.png Graphic file (type png)
-<use tab3.png>
-Package pdftex.def Info: tab3.png  used on input line 115.
-(pdftex.def)             Requested size: 263.8268pt x 169.60294pt.
+
+Overfull \hbox (12.18881pt too wide) detected at line 115
+  [] [][] [][] [][] [][] [][][][][] [][] [][]  
+ []
+
+<sceen3.png, id=601, 1475.5125pt x 635.37375pt>
+File: sceen3.png Graphic file (type png)
+<use sceen3.png>
+Package pdftex.def Info: sceen3.png  used on input line 115.
+(pdftex.def)             Requested size: 393.86829pt x 169.6045pt.
+
+Overfull \hbox (12.18881pt too wide) has occurred while \output is active
+  [] [][] [][] [][] [][] [][][][][] [][] [][]  
+ []
+
 
 Overfull \hbox (3.54456pt too wide) has occurred while \output is active
  [][]  
@@ -747,16 +842,26 @@ Overfull \hbox (3.54456pt too wide) has occurred while \output is active
 
 [9
 
- <./tab3.png (PNG copy)>]
+ <./sceen3.png>]
 Overfull \hbox (3.54456pt too wide) in paragraph at lines 121--121
  [][]  
  []
 
-<tab4.png, id=744, 1405.25pt x 903.375pt>
-File: tab4.png Graphic file (type png)
-<use tab4.png>
-Package pdftex.def Info: tab4.png  used on input line 121.
-(pdftex.def)             Requested size: 263.8268pt x 169.60294pt.
+
+Overfull \hbox (12.18881pt too wide) detected at line 121
+  [] [][] [][] [][] [][] [][][][][] [][] [][]  
+ []
+
+<sceen4.png, id=664, 1475.5125pt x 453.695pt>
+File: sceen4.png Graphic file (type png)
+<use sceen4.png>
+Package pdftex.def Info: sceen4.png  used on input line 121.
+(pdftex.def)             Requested size: 398.32616pt x 122.47852pt.
+
+Overfull \hbox (12.18881pt too wide) has occurred while \output is active
+  [] [][] [][] [][] [][] [][][][][] [][] [][]  
+ []
+
 
 Overfull \hbox (3.54456pt too wide) has occurred while \output is active
  [][]  
@@ -764,9 +869,19 @@ Overfull \hbox (3.54456pt too wide) has occurred while \output is active
 
 [10
 
- <./tab4.png (PNG copy)>]
+ <./sceen4.png>]
 Overfull \hbox (3.54456pt too wide) in paragraph at lines 137--137
  [][]  
+ []
+
+
+Overfull \hbox (12.18881pt too wide) detected at line 137
+  [] [][] [][] [][] [][] [][][][][] [][] [][]  
+ []
+
+
+Overfull \hbox (12.18881pt too wide) has occurred while \output is active
+  [] [][] [][] [][] [][] [][][][][] [][] [][]  
  []
 
 
@@ -779,6 +894,16 @@ Overfull \hbox (3.54456pt too wide) has occurred while \output is active
 ]
 Overfull \hbox (3.54456pt too wide) in paragraph at lines 150--150
  [][]  
+ []
+
+
+Overfull \hbox (12.18881pt too wide) detected at line 150
+  [] [][] [][] [][] [][] [][][][][] [][] [][]  
+ []
+
+
+Overfull \hbox (12.18881pt too wide) has occurred while \output is active
+  [] [][] [][] [][] [][] [][][][][] [][] [][]  
  []
 
 
@@ -803,41 +928,22 @@ Overfull \hbox (3.54456pt too wide) has occurred while \output is active
 LaTeX2e <2025-11-01>
 L3 programming layer <2026-03-20>
  ***********
-
-
-Package rerunfilecheck Warning: File `presentation.out' has changed.
-(rerunfilecheck)                Rerun to get outlines right
-(rerunfilecheck)                or use package `bookmark'.
-
-Package rerunfilecheck Info: Checksums for `presentation.out':
-(rerunfilecheck)             Before: A2210EB11CDB25418A90E97F766D9E7D;1017
-(rerunfilecheck)             After:  876F9F224925CF365E9F465A68571D6C;1077.
+Package rerunfilecheck Info: File `presentation.out' has not changed.
+(rerunfilecheck)             Checksum: 876F9F224925CF365E9F465A68571D6C;1077.
  ) 
 Here is how much of TeX's memory you used:
- 21377 strings out of 469339
- 417006 string characters out of 5465414
- 810666 words of memory out of 5000000
- 49741 multiletter control sequences out of 15000+600000
+ 21365 strings out of 469339
+ 416950 string characters out of 5465414
+ 808666 words of memory out of 5000000
+ 49733 multiletter control sequences out of 15000+600000
  637610 words of font info for 78 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
  101i,20n,107p,414b,797s stack positions out of 10000i,1000n,20000p,200000b,200000s
-
-pdfTeX warning (dest): name{Navigation15} has been referenced but does not exist, replaced by a fixed one
-
-
-pdfTeX warning (dest): name{Navigation14} has been referenced but does not exist, replaced by a fixed one
-
-
-pdfTeX warning (dest): name{Navigation13} has been referenced but does not exist, replaced by a fixed one
-
-
-pdfTeX warning (dest): name{Navigation16} has been referenced but does not exist, replaced by a fixed one
-
 </Users/miinguyen/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmss10.pfb></Users/miinguyen/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmss12.pfb></Users/miinguyen/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmss8.pfb></Users/miinguyen/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmssbx10.pfb></Users/miinguyen/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmssi10.pfb></Users/miinguyen/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></Users/miinguyen/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb>
-Output written on presentation.pdf (12 pages, 990063 bytes).
+Output written on presentation.pdf (12 pages, 853714 bytes).
 PDF statistics:
- 972 PDF objects out of 1000 (max. 8388607)
- 636 compressed objects within 7 object streams
- 36 named destinations out of 1000 (max. 500000)
+ 872 PDF objects out of 1000 (max. 8388607)
+ 585 compressed objects within 6 object streams
+ 32 named destinations out of 1000 (max. 500000)
  149 words of extra memory for PDF output out of 10000 (max. 10000000)
 

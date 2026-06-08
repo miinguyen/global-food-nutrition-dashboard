@@ -2179,7 +2179,7 @@ def server(input, output, session):
                 class_="p-3 bg-light border rounded mb-3"
             ),
             ui.div(
-                ui.h5("AI Recommendations & Dietary Analysis:", class_="fw-bold"),
+                ui.h5("Recommendations & Dietary Analysis:", class_="fw-bold"),
                 ui.markdown("\n\n".join(recs)),
                 class_=f"alert {alert_class} mt-2"
             )
